@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "string.h": "c",
+        "chrono": "c",
+        "ranges": "c",
+        "variant": "c",
+        "array": "c"
+    }
+}
