@@ -1,11 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/**
+ * @param str The actual character array.
+ * @param length The length of str.
+ */
 typedef struct CharArray
 {
     char *str;
     size_t length;
 } CharArray;
+
+static void _incertString(char *strToIncertInto, const char *strToIncert, size_t strToIncertLength, size_t startIndex)
+{
+    for (size_t i = 0; i < strToIncertLength; i++)
+    {
+        strToIncertInto[startIndex + i] = strToIncert[i];
+    }
+}
 
 /**
  * Creates a new CharArray and returns it's pointer.
@@ -21,7 +33,7 @@ typedef struct CharArray
  *
  * If length is less than 0, the program exits with status code EXIT_FAILURE.
  */
-CharArray *newCharArray(char *str, size_t length)
+CharArray *newCharArray(const char *str, size_t length)
 {
     if (length < 0)
     {
@@ -29,7 +41,7 @@ CharArray *newCharArray(char *str, size_t length)
         exit(EXIT_FAILURE);
     }
 
-    CharArray *newArr = calloc(sizeof(CharArray), 1);
+    CharArray *newArr = calloc(1, sizeof(CharArray));
     if (newArr == NULL)
     {
         printf("\nError: Could not allocate memory for a new CharArray.\n\n");
@@ -43,7 +55,7 @@ CharArray *newCharArray(char *str, size_t length)
     }
     else
     {
-        newStr = calloc(sizeof(char), length);
+        newStr = calloc(length, sizeof(char));
     }
 
     newArr->str = newStr;
@@ -71,13 +83,7 @@ void freeCharArray(CharArray *target)
     free(target);
 }
 
-static void _incertString(char *strToIncertInto, char *strToIncert, size_t strToIncertLength, size_t startIndex)
-{
-    for (size_t i = 0; i < strToIncertLength; i++)
-    {
-        strToIncertInto[startIndex + i] = strToIncert[i];
-    }
-}
+
 
 /**
  * Extends a character array (array) by a given amount (n) of slots.
