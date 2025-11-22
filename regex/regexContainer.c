@@ -34,7 +34,8 @@ typedef struct RegexContainer
  * @param pattern A pointer to the string pattern, which will be compiled into a regex. If NULL, NULL is returned.
  * @param maxGroups The maximum count of groups, which will be present in the regex. 
  * The first (index 0) is always the whole matched string.
- * @param flag A regex flag to use in the regcomp function.
+ * @param flag A regex flag to use in the regcomp function. 
+ * Example REG_EXTENDED (int 1) for compiling an Extended Regular Expression.
  * @return A pointer to the new RegexContainer.
  */
 RegexContainer *newRegexContainer(const char *pattern, size_t maxGroups, int flag)
@@ -134,12 +135,13 @@ void match(const char *input, size_t inputLength, RegexContainer *container)
 }
 
 /**
- * Returns the matched string from a group.
+ * Get the matched string from a group.
  * @param n The index of the group indicating the wanted value, from the groups property of the RegexContainer.
  * Must be 0 or less than the maxGroups property of the RegexContainer, or else NULL is returned.
  * @param container Pointer to the RegexContainer with the relevant data. If NULL, NULL is returned.
  * If the isMatch property of the container is 0, NULL is returned.
- * @returns The pointer to the string, selected by the group.
+ * @returns The pointer to the string, selected by the group. 
+ * The returned pointer may be used in the free function, as it's memory is manualy allocated.
  */
 char *getGroupValue(const int n, const RegexContainer *container)
 {
