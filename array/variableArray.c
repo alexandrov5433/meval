@@ -41,11 +41,14 @@ VariableArray *newVariableArray()
 
 /**
  * Frees the memory used by a VariableArray.
- * @param ptr The pointer to the VariableArray, which must be freed. 
+ * @param ptr The pointer to the VariableArray, which must be freed. If NULL, nothing is done.
  * 
  * All Variable-s contained in the VariableArray are also freed, if there are any.
  */
 void freeVariableArray(VariableArray *ptr) {
+    if (ptr == NULL) {
+        return;
+    }
     if (ptr->array != NULL) {
         for (int i = 0; i < ptr->length; i++) {
             free((ptr->array)[i]);
