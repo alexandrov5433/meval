@@ -53,5 +53,28 @@ void setRootExpression(CharArray *exp, Data *data) {
         printf("\nError: The given Data structure already has a set expression property.\n\n");
         exit(EXIT_FAILURE);
     }
+    checkParenthesisSyntax(exp);
     data->expression = newExpression(exp, NULL);
+}
+
+/**
+ * Evaluates the root expression.
+ * @param data A pointer to the Data structure, containing the Expression.
+ * 
+ * The program exits with EXIT_FAILURE if either of the .expression and .variables properties of the Data structure are NULL.
+ * 
+ */
+void evaluate(Data *data)
+{
+    if (data->expression == NULL) {
+        printf("\nError: The given Data structure has a NULL pointer for an .expression property.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    if (data->variables == NULL) {
+        printf("\nError: The given Data structure has a NULL pointer for a .variables property.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    // check parenthesis syntax
+    calculateExpressionValue(data->expression, data->variables);
+    
 }
