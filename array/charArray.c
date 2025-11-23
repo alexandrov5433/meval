@@ -72,10 +72,13 @@ CharArray *newCharArray(const char *str, size_t length)
 /**
  * Frees the memory allocated for the CharArray.
  * If the inner char *str property of the CharArray is NULL, it is skipped. Otherwise, it is also freed.
- * @param target Pointer to the CharArray, which is to be freed.
+ * @param target Pointer to the CharArray, which is to be freed. If NULL, nothing is done.
  */
 void freeCharArray(CharArray *target)
 {
+    if (target == NULL) {
+        return;
+    }
     if (target->str != NULL)
     {
         free(target->str);
