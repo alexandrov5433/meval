@@ -1,13 +1,43 @@
 #include <stdlib.h>
 
 #include "array/_index.c"
+#include "expression.c"
+#include "regex/_index.c"
 
 typedef struct Operant
 {
     CharArray *operantStr;
     double value;
-    int floatingPointSymbolIncluded; // can be ',' or '.'
+    int floatingPointSymbolIncluded; // 1 if symbol ',' or '.' included, else 0 (default).
+    int isExpression;                // 1 if expression, else 0 (default).
+    int isVariable;                  // 1 if variable, else 0 (default).
 } Operant;
+
+Operant *newOperant()
+{
+    Operant *operant = calloc(1, sizeof(Operant));
+    if (operant == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new Operant.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    operant->operantStr = newCharArray(NULL, 0);
+    operant->value = 0.0;
+    operant->floatingPointSymbolIncluded = 0;
+    operant->isExpression = 0;
+    operant->isVariable = 0;
+    return operant;
+}
+
+/**
+ * Frees the memory allocated for the Operant.
+ * @param operant A pointer to the Operant, which must be freed.
+ */
+void freeOperant(Operant *operant)
+{
+    freeCharArray(operant->operantStr);
+    free(operant);
+}
 
 /**
  * Extends the CharArray (operantStr) of the Operant by 1 and places the given character (c) at the end.
@@ -23,14 +53,55 @@ void appendCharToOperant(char c, Operant *op)
  * @return 0 on success, 1 otherwise.
  * 1 is returned when realloc fails (realloc returns NULL).
  */
-int prependCharToOperant(char c, Operant *op)
+void prependCharToOperant(char c, Operant *op)
 {
     prependCharTo(op->operantStr, c);
 }
 
-void evaluateOperantValue(Operant *op)
+int extractPlaceholderInt(CharArray *placeholder)
 {
-    (op->value) = strtod((op->operantStr->str), NULL);
+    // #2134#
+    RegexContainer *container = newRegexContainer(REGEX_EXP_PLACEHOLDER, 2, REG_EXTENDED);
+    match(placeholder->str, placeholder->length, container);
+    char *str = getGroupValue(1, container);
+    if (str == NULL)
+    {
+        printf("\nError: Could not extract placeholder integer.\n\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int result = atoi(str);
+    free(str);
+    return result;
+}
+
+void evaluateOperantValue(Expression *expression, VariableArray *variables, Operant *op)
+{
+    /*
+        1. inner expression - #123#
+        2. variable - x, y, z ...
+        3. double or integer - 1209347
+    */
+    if (op->isExpression == 1)
+    {
+        int i = extractPlaceholderInt(op->operantStr);
+        op->value = ((expression->innerExpressions->array)[i])->value;
+    }
+    else if (op->isVariable == 1)
+    {
+        char varName = (op->operantStr->str)[0];
+        Variable *var = findByName(varName, variables);
+        if (var == NULL)
+        {
+            printf("\nError: Could not find Variable with the '%c' character.\n\n", varName);
+            exit(EXIT_FAILURE);
+        }
+        op->value = var->value;
+    }
+    else
+    {
+        op->value = strtod(op->operantStr->str, NULL);
+    }
 }
 
 /**
@@ -52,7 +123,7 @@ void checkOperantEnd(Operant *op)
 
 /**
  * If the Operant includes a floating point symbol ('.' or ','), the program exits with EXIT_FAILURE.
- * This check is done using the floatingPointSymbolIncluded property of Operant. 
+ * This check is done using the floatingPointSymbolIncluded property of Operant.
  */
 void checkFloatingPointIncluded(Operant *op)
 {
@@ -67,11 +138,12 @@ void checkFloatingPointIncluded(Operant *op)
     }
 }
 
-void getLeftOperant(CharArray *exp, Operant *leftOp, int *indexLeft)
+void getLeftOperant(Expression *expression, VariableArray *variables, Operant *leftOp, int *indexLeft)
 {
+    char *exp = expression->expDummy->str;
+    // skip white space
     while (1)
     {
-        // skip white space
         if (*indexLeft <= 0)
         {
             printf("\nSyntax Error:\n"
@@ -79,7 +151,7 @@ void getLeftOperant(CharArray *exp, Operant *leftOp, int *indexLeft)
             exit(EXIT_FAILURE);
         }
 
-        char elem = (exp->str)[*indexLeft];
+        char elem = exp[*indexLeft];
 
         if (elem != ' ')
         {
@@ -89,6 +161,52 @@ void getLeftOperant(CharArray *exp, Operant *leftOp, int *indexLeft)
         (*indexLeft)--;
     }
 
+    // case: inner expression placeholder
+    if (exp[*indexLeft] == '#')
+    {
+        leftOp->isExpression = 1;
+        leftOp->isVariable = 0;
+        prependCharToOperant('#', leftOp); // first #
+        (*indexLeft)--;
+
+        while (1)
+        {
+            if (*indexLeft <= 0)
+            {
+                printf("\nSyntax Error:\n"
+                       "The expression ended unexpectedly, while evaluating an operant.\n");
+                exit(EXIT_FAILURE);
+            }
+            char elem = exp[*indexLeft];
+            if (elem >= 48 && elem <= 57)
+            {
+                // integer 0-9
+                prependCharToOperant(elem, leftOp);
+            }
+            else if (elem == '#')
+            {
+                // last #
+                prependCharToOperant(elem, leftOp);
+                evaluateOperantValue(expression, variables, leftOp);
+                return;
+            }
+            (*indexLeft)--;
+        }
+    }
+    else if (exp[*indexLeft] > 96 && exp[*indexLeft] < 123)
+    // case: variable
+    {
+        // ASCII 'a' == 97 ; 'z' == 122
+        leftOp->isExpression = 0;
+        leftOp->isVariable = 1;
+        appendCharToOperant(exp[*indexLeft], leftOp);
+        evaluateOperantValue(expression, variables, leftOp);
+        return;
+    }
+
+    // case: integer or double
+    leftOp->isExpression = 0;
+    leftOp->isVariable = 0;
     while (1)
     {
         if (*indexLeft <= 0)
@@ -97,27 +215,27 @@ void getLeftOperant(CharArray *exp, Operant *leftOp, int *indexLeft)
                    "The expression ended unexpectedly, while evaluating an operant.\n");
             exit(EXIT_FAILURE);
         }
-        char elem = (exp->str)[*indexLeft];
+        char elem = exp[*indexLeft];
         // TODO: add mathematical constants, logarithm ect.
 
         if (elem >= 48 && elem <= 57)
         {
             // integer 0-9
-            prependChar(elem, &leftOp);
+            prependCharToOperant(elem, leftOp);
         }
         else if (elem == '.' || elem == ',')
         {
             // floating point symbol
             checkFloatingPointIncluded(leftOp); // exit if included
 
-            prependChar(elem, &leftOp);
+            prependCharToOperant(elem, leftOp);
             leftOp->floatingPointSymbolIncluded = 1;
         }
         else
         {
             checkOperantEnd(leftOp); // exit if invalid
 
-            evaluateOperantValue(&leftOp);
+            evaluateOperantValue(expression, variables, leftOp);
 
             break;
         }
@@ -125,14 +243,14 @@ void getLeftOperant(CharArray *exp, Operant *leftOp, int *indexLeft)
     }
 }
 
-void getRightOperant(CharArray *exp, Operant *rightOp, int *indexRight)
+void getRightOperant(Expression *expression, VariableArray *variables, Operant *rightOp, int *indexRight)
 {
-    char *e = exp->str;
-    int expLength = exp->length;
+    char *exp = expression->expDummy->str;
+    int expLength = expression->expDummy->length;
 
+    // skip white space
     while (1)
     {
-        // skip white space
         if (*indexRight >= expLength)
         {
             printf("\nSyntax Error:\n"
@@ -140,7 +258,7 @@ void getRightOperant(CharArray *exp, Operant *rightOp, int *indexRight)
             exit(EXIT_FAILURE);
         }
 
-        char elem = e[*indexRight];
+        char elem = exp[*indexRight];
 
         if (elem != ' ')
         {
@@ -149,6 +267,53 @@ void getRightOperant(CharArray *exp, Operant *rightOp, int *indexRight)
 
         (*indexRight)++;
     }
+
+    // case: inner expression placeholder
+    if (exp[*indexRight] == '#')
+    {
+        rightOp->isExpression = 1;
+        rightOp->isVariable = 0;
+        appendCharToOperant('#', rightOp); // first #
+        (*indexRight)++;
+
+        while (1)
+        {
+            if (*indexRight >= expLength)
+            {
+                printf("\nSyntax Error:\n"
+                       "The expression ended unexpectedly, while evaluating an operant.\n");
+                exit(EXIT_FAILURE);
+            }
+            char elem = exp[*indexRight];
+            if (elem >= 48 && elem <= 57)
+            {
+                // integer 0-9
+                appendCharToOperant(elem, rightOp);
+            }
+            else if (elem == '#')
+            {
+                // last #
+                appendCharToOperant(elem, rightOp);
+                evaluateOperantValue(expression, variables, rightOp);
+                return;
+            }
+            (*indexRight)++;
+        }
+    }
+    else if (exp[*indexRight] > 96 && exp[*indexRight] < 123)
+    {
+        // case: variable
+        // 'a' == 97 ; 'z' == 122
+        rightOp->isExpression = 0;
+        rightOp->isVariable = 1;
+        appendCharToOperant(exp[*indexRight], rightOp); // first #
+        evaluateOperantValue(expression, variables, rightOp);
+        return;
+    }
+
+    // case: intiger or double
+    rightOp->isExpression = 0;
+    rightOp->isVariable = 0;
     while (1)
     {
         if (*indexRight >= expLength)
@@ -157,32 +322,30 @@ void getRightOperant(CharArray *exp, Operant *rightOp, int *indexRight)
                    "The expression ended unexpectedly, while evaluating an operant.\n");
             exit(EXIT_FAILURE);
         }
-        char elem = e[*indexRight];
+        char elem = exp[*indexRight];
         // TODO: add mathematical constants, logarithm ect.
-        
+
         if (elem >= 48 && elem <= 57)
         {
             // integer 0-9
-            appendChar(elem, &rightOp);
+            appendCharToOperant(elem, rightOp);
         }
         else if (elem == '.' || elem == ',')
         {
             // floating point symbol
             checkFloatingPointIncluded(rightOp); // exit if included
 
-            appendChar(elem, &rightOp);
+            appendCharToOperant(elem, rightOp);
             rightOp->floatingPointSymbolIncluded = 1;
         }
         else
         {
             checkOperantEnd(rightOp); // exit if invalid
 
-            evaluateOperantValue(&rightOp);
+            evaluateOperantValue(expression, variables, rightOp);
 
             break;
         }
-
         (*indexRight)++;
     }
 }
-
