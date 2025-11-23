@@ -6,6 +6,7 @@
 typedef struct Expression
 {
     CharArray *exp;
+    CharArray *expDummy;
     ExpressionArray *innerExpressions;
     Expression *parentExpression;
     double value;
@@ -17,52 +18,9 @@ typedef struct ExpressionArray
     size_t length;
 } ExpressionArray;
 
-/**
- * Creates a new Expression.
- * @param expression Pointer to a CharArray containing the expression, which is the main expression for this instance.
- * The memory of this pointer must not be freed, as this pointer is  placed in the new Expression instance. 
- * @param parentExpression Pointer to an other Expression, in which this new one will be contained.
- * The memory of this pointer must also not be freed. NULL can be given as an argument, if there is no parent Expression.
- * @return The pointer to the newly created Expression instance.
- */
-Expression *newExpression(CharArray *expression, Expression *parentExpression)
-{
-    Expression *newExp = calloc(sizeof(Expression), 1);
-    if (newExp == NULL)
-    {
-        printf("\nError: Could not allocate memory for a new Expression.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    newExp->exp = expression;
-    newExp->innerExpressions = NULL;
-    newExp->parentExpression = parentExpression; // can be NULL
-    newExp->value = 0.0;
-
-    parse(newExp);
-}
-
-static ExpressionArray *newExpressionArray(Expression *exp)
-{
-    // TODO: NULL-check for exp ???
-    ExpressionArray *expArray = calloc(sizeof(ExpressionArray), 1);
-    if (expArray == NULL)
-    {
-        printf("\nError: Could not allocate memory for a new ExpressionArray.\n\n");
-        exit(EXIT_FAILURE);
-    }
-
-    Expression **array = calloc(sizeof(Expression *), 1);
-    if (array == NULL)
-    {
-        printf("\nError: Could not allocate memory for a new array for Expression-s.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    array[0] = exp;
-
-    expArray->array = array;
-    expArray->length = 1;
-
-    return expArray;
+void updateDummy(Expression *expression) {
+    freeCharArray(expression->expDummy);
+    expression->expDummy = copy(expression->exp, 0, expression->exp->length - 1);
 }
 
 static void addInnerExpression(Expression *mainExp, Expression *innerExp)
@@ -93,7 +51,7 @@ static void addInnerExpression(Expression *mainExp, Expression *innerExp)
 static CharArray *createPlaceholder(int *n)
 {
     // INT_MAX == 2147483647 == 10 char
-    char *buffer = calloc(sizeof(char), 12);
+    char *buffer = calloc(12, sizeof(char));
     sprintf(buffer, "#%d#", *n);
     CharArray *placeholder = newCharArray(buffer, 19);
     squish(placeholder);
@@ -104,7 +62,6 @@ static void extractExpression(Expression *mainExp, int openIndex, int closeIndex
 {
     CharArray *placeholder = createPlaceholder(innerExpCounter);
 
-    // TODO: What to do when we have '()' in the expression??? Handle in parenthesis syntax check? Syntax Error?
     CharArray *innerExp = copy(mainExp, openIndex + 1, closeIndex - 1); // +1 and -1 to not copy the '(' and ')'
     replacePart(mainExp->exp, openIndex, closeIndex, placeholder);
     freeCharArray(placeholder);
@@ -161,4 +118,124 @@ static void parse(Expression *mainExp)
             }
         }
     }
+
+    updateDummy(mainExp);
+}
+
+void calculateExpressionValue(Expression *expression, VariableArray *variables)
+{
+    if (expression->innerExpressions != NULL) {
+        for (int i = 0; i < expression->innerExpressions->length; i++) {
+            calculateExpressionValue((expression->innerExpressions->array)[i], variables);
+        }
+    }
+
+    // 2 + #0#^2 + #1#*2
+    char *expStr = expression->expDummy->str;
+    int *expLength = &(expression->expDummy->length);
+
+    // operator: ^
+    for (int exponentIndex = 0; exponentIndex < *expLength; exponentIndex++)
+    {
+        char currentChar = expStr[exponentIndex];
+        if (currentChar == '^')
+        {
+            calcOperator(expression, variables, exponentIndex);
+            exponentIndex = 0;
+        }
+    }
+    // operator: *
+    for (int multiplicationIndex = 0; multiplicationIndex < *expLength; multiplicationIndex++)
+    {
+        char currentChar = expStr[multiplicationIndex];
+        if (currentChar == '*')
+        {
+            calcOperator(expression, variables, multiplicationIndex);
+            multiplicationIndex = 0;
+        }
+    }
+    // operator: /
+    for (int divisionIndex = 0; divisionIndex < *expLength; divisionIndex++)
+    {
+        char currentChar = expStr[divisionIndex];
+        if (currentChar == '/')
+        {
+            calcOperator(expression, variables, divisionIndex);
+            divisionIndex = 0;
+        }
+    }
+    // operator: +
+    for (int additionIndex = 0; additionIndex < *expLength; additionIndex++)
+    {
+        char currentChar = expStr[additionIndex];
+        if (currentChar == '+')
+        {
+            calcOperator(expression, variables, additionIndex);
+            additionIndex = 0;
+        }
+    }
+    // operator: -
+    for (int subtractionIndex = 0; subtractionIndex < *expLength; subtractionIndex++)
+    {
+        char currentChar = expStr[subtractionIndex];
+        if (currentChar == '-')
+        {
+            calcOperator(expression, variables, subtractionIndex);
+            subtractionIndex = 0;
+        }
+    }
+
+    // TODO: add logarithm, math. constants etc.
+
+    // at this point, there should be only one number in the expression's string - the result
+    expression->value = strtod(expStr, NULL);
+}
+
+/**
+ * Creates a new Expression.
+ * @param expression Pointer to a CharArray containing the expression, which is the main expression for this instance.
+ * The memory of this pointer must not be freed, as this pointer is  placed in the new Expression instance. 
+ * @param parentExpression Pointer to an other Expression, in which this new one will be contained.
+ * The memory of this pointer must also not be freed. NULL can be given as an argument, if there is no parent Expression.
+ * @return The pointer to the newly created Expression instance.
+ */
+Expression *newExpression(CharArray *expression, Expression *parentExpression)
+{
+    Expression *newExp = calloc(1, sizeof(Expression));
+    if (newExp == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new Expression.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    newExp->exp = expression;
+    newExp->expDummy = copy(expression, 0, expression->length - 1);
+    newExp->innerExpressions = NULL;
+    newExp->parentExpression = parentExpression; // can be NULL
+    newExp->value = 0.0;
+
+    parse(newExp);
+}
+
+static ExpressionArray *newExpressionArray(Expression *exp)
+{
+    // TODO: NULL-check for exp ???
+    ExpressionArray *expArray = calloc(1, sizeof(ExpressionArray));
+    if (expArray == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new ExpressionArray.\n\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Expression **array = calloc(1, sizeof(Expression *));
+    if (array == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new array for Expression-s.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    array[0] = exp;
+
+    expArray->array = array;
+    expArray->length = 1;
+
+    return expArray;
 }
