@@ -62,7 +62,7 @@ int extractPlaceholderInt(CharArray *placeholder)
 {
     // #2134#
     RegexContainer *container = newRegexContainer(REGEX_EXP_PLACEHOLDER, 2, REG_EXTENDED);
-    match(placeholder->str, placeholder->length, container);
+    match(placeholder->str, container);
     char *str = getGroupValue(1, container);
     if (str == NULL)
     {

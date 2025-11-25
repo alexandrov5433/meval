@@ -15,9 +15,8 @@ https://pubs.opengroup.org/onlinepubs/009696899/functions/regcomp.html
  * The groups counting stats from 0 - index based. The first group (index 0) indicates the whole matchedInput string.
  * @param matchedInput A pointer to the input string, against which the compiled regex was matched. Initialized as NULL.
  * @param isMatch 1 if a match was made, 0 otherwise. Initialized as 0.
- * @param inputLength The length of the mathchedInput string. Initialized as 0.
  * 
- * The matchedInput, isMatched and inputLength properties are changed by the match function.
+ * The matchedInput and isMatched properties are changed by the match function.
  */
 typedef struct RegexContainer
 {
@@ -26,7 +25,6 @@ typedef struct RegexContainer
     regmatch_t *groups;
     char *matchedInput;
     int isMatch;
-    int inputLength;
 } RegexContainer;
 
 /**
@@ -75,7 +73,6 @@ RegexContainer *newRegexContainer(const char *pattern, size_t maxGroups, int fla
     container->groups = groups;
     container->matchedInput = NULL;
     container->isMatch = 0;
-    container->inputLength = 0;
 
     return container;
 }
@@ -104,21 +101,18 @@ void freeRegexContainer(RegexContainer *container)
 /**
  * Attempts to match the given string against the ragex in the RegexContainer.
  * @param input The string to match.
- * @param inputLength The length of the string to match.
  * @param container The RegexContainer holding all regex related data, including the compiled regex pattern.
  *
  * If the attempt to match is successful:
  *
  * 1. the isMatch property of the container is set to 1.
- *
- * 2. the inputLength property of the container is set to the given inputLength.
  * 
- * 3. the matchedInput property of the container is set to the given input.
+ * 2. the matchedInput property of the container is set to the given input.
  *
- * On failure to match, the isMatch and inputLength properties of the container are both set to 0 and
+ * On failure to match, the isMatch is set to 0 and
  * the matchedInput property is set to NULL.
  */
-void match(const char *input, size_t inputLength, RegexContainer *container)
+void match(const char *input, RegexContainer *container)
 {
     if (input == NULL || container == NULL)
     {
@@ -130,7 +124,6 @@ void match(const char *input, size_t inputLength, RegexContainer *container)
     */
     int status = regexec(container->regex, input, container->maxGroups, container->groups, 0);
     container->isMatch = status == 0 ? 1 : 0;
-    container->inputLength = status == 0 ? inputLength : 0;
     container->matchedInput = status == 0 ? input : NULL;
 }
 
