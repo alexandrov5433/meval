@@ -18,7 +18,128 @@ typedef struct ExpressionArray
     size_t length;
 } ExpressionArray;
 
-void updateDummy(Expression *expression) {
+/**
+ * Deletes the pointer to the Expression from the ExpressionArray, if present.
+ * @param exp A pointer to the Expression, which must be deleted from the array.
+ * If this pointer is not present in the ExpressionArray, the (same) pointer to the ExpressionArray is returned.
+ * If NULL, nothing is done and the (same) pointer given for the ExpressionArray is returned.
+ * Even if removed from the array, the memory of this pointer is NOT freed.
+ * @param arr A pointer to the ExpressionArray, from which the pointer to the Expression must be deleted.
+ * If NULL, nothing is done and NULL is returned. 
+ * The memory of this (old) pointer is freed: 
+ * 
+ * 1. when the new one is returned.
+ * 
+ * 2. when there was only one element in the ExpressionArray, which was deleted. 
+ * 
+ * @return A new pointer to the newly created (without the targeted Expression pointer) ExpressionArray.
+ * The length of the new array will be with one less than that of the targeted ExpressionArray.
+ * If the new array is empty (e.g. the targeted ExpressionArray contained only 1 pointer, which was to be deleted), NULL is returned.
+ */
+ExpressionArray *deleteExpFromArray(Expression *exp, ExpressionArray *arr)
+{
+    if (exp == NULL)
+    {
+        return arr;
+    }
+    if (arr == NULL)
+    {
+        return NULL;
+    }
+    
+    int isPresent = 0;
+    for (int i = 0; i < arr->length; i++)
+    {
+        if (exp == (arr->array)[i])
+        {
+            isPresent = 1;
+            break;
+        }
+    }
+    if (isPresent == 0)
+    {
+        return arr;
+    }
+    
+    int newLength = (arr->length) - 1;
+    if (newLength <= 0) {
+        free(arr);
+        return NULL;
+    }
+
+    ExpressionArray *newExpArr = calloc(1, sizeof(ExpressionArray));
+    if (newExpArr == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new ExpressionArray.\n\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Expression **newArr = calloc(newLength, sizeof(Expression *));
+    if (newArr == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new Array for pointers. Func: deleteExpFromArray.\n\n");
+        exit(EXIT_FAILURE);
+    }
+
+    newExpArr->array = newArr;
+    newExpArr->length = newLength;
+
+    int index = 0;
+    for (int i = 0; i < arr->length; i++)
+    {
+        if ((arr->array)[i] != exp)
+        {
+            (newExpArr->array)[index] = (arr->array)[i];
+            index++;
+        }
+    }
+
+    free(arr);
+    return newExpArr;
+}
+
+/**
+ * This is a helper function for the freeExpression function.
+ * This lets us remove the pointer of the target Expression from the innerExpressions array of the parent Expression, if present.
+ */
+static void _freeExpression(Expression *ptr)
+{
+    if (ptr == NULL)
+    {
+        return;
+    }
+    if (ptr->innerExpressions != NULL)
+    {
+        for (int i = 0; i < ptr->innerExpressions->length; i++)
+        {
+            _freeExpression((ptr->innerExpressions->array)[i]);
+            free(ptr->innerExpressions);
+        }
+    }
+    free(ptr);
+}
+
+/**
+ * Frees the memory allocated for the Expression and all inner expressions in the ExpressionArray, if present.
+ * The Expression in the .parentExpression, if present, property is not touched.
+ * @param ptr A pointer to the Expression, from which to start freeing memory. If NULL, nothing is done.
+ */
+void freeExpression(Expression *ptr)
+{
+    if (ptr == NULL)
+    {
+        return;
+    }
+    // remove the pointer of this Expression from the parent Expression, if present.
+    if (ptr->parentExpression != NULL)
+    {
+        ptr->parentExpression->innerExpressions = deleteExpFromArray(ptr, ptr->parentExpression->innerExpressions);
+    }
+    _freeExpression(ptr);
+}
+
+void updateDummy(Expression *expression)
+{
     freeCharArray(expression->expDummy);
     expression->expDummy = copy(expression->exp, 0, expression->exp->length - 1);
 }
@@ -41,7 +162,7 @@ static void addInnerExpression(Expression *mainExp, Expression *innerExp)
 
     *innerExpArr = newArray;
     innerExpArr[mainExp->innerExpressions->length] = innerExp; // old length is now the last index
-    mainExp->innerExpressions->length++; // increment old length, to actually show length
+    mainExp->innerExpressions->length++;                       // increment old length, to actually show length
 }
 
 /**
@@ -65,7 +186,7 @@ static void extractExpression(Expression *mainExp, int openIndex, int closeIndex
     CharArray *innerExp = copy(mainExp, openIndex + 1, closeIndex - 1); // +1 and -1 to not copy the '(' and ')'
     replacePart(mainExp->exp, openIndex, closeIndex, placeholder);
     freeCharArray(placeholder);
-    
+
     Expression *newInnerExp = newExpression(innerExp, mainExp);
     addInnerExpression(mainExp, newInnerExp);
 }
@@ -124,8 +245,10 @@ static void parse(Expression *mainExp)
 
 void calculateExpressionValue(Expression *expression, VariableArray *variables)
 {
-    if (expression->innerExpressions != NULL) {
-        for (int i = 0; i < expression->innerExpressions->length; i++) {
+    if (expression->innerExpressions != NULL)
+    {
+        for (int i = 0; i < expression->innerExpressions->length; i++)
+        {
             calculateExpressionValue((expression->innerExpressions->array)[i], variables);
         }
     }
@@ -194,7 +317,7 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
 /**
  * Creates a new Expression.
  * @param expression Pointer to a CharArray containing the expression, which is the main expression for this instance.
- * The memory of this pointer must not be freed, as this pointer is  placed in the new Expression instance. 
+ * The memory of this pointer must not be freed, as this pointer is  placed in the new Expression instance.
  * @param parentExpression Pointer to an other Expression, in which this new one will be contained.
  * The memory of this pointer must also not be freed. NULL can be given as an argument, if there is no parent Expression.
  * @return The pointer to the newly created Expression instance.
