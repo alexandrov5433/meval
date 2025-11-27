@@ -21,6 +21,24 @@ typedef struct VariableArray
 } VariableArray;
 
 /**
+ * Creates a new Varaible.
+ * @param name The value for the name property of the Variable.
+ * @param value The value for the value property of the Variable.
+ * @return The pointer to the newly created Variable.
+ */
+Variable *newVariable(const char name, const double value) {
+    Variable *variable = calloc(1, sizeof(Variable));
+    if (variable == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new Variable.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    variable->name = name;
+    variable->value = value;
+    return variable;
+}
+
+/**
  * Creates a new VariableArray.
  * @return The pointer to the new VaribleArray.
  */
@@ -62,9 +80,9 @@ void freeVariableArray(VariableArray *ptr) {
  * @param newVariable The pointer to the Variable, which must be appended to the VariableArray.
  * @param variables The pointer to the VariableArray, at the end of which the pointer to the Variable will be appended.
  */
-void append(const Variable *newVariable, VariableArray *variables)
+void appendVariable(const Variable *newVariable, VariableArray *variables)
 {
-    Variable **temp = realloc(variables->array, sizeof(Variable) * (variables->length + 1));
+    Variable **temp = realloc(variables->array, sizeof(Variable *) * (variables->length + 1));
     if (temp == NULL)
     {
         printf("\nError: Could not reallocate Variable array.\n\n");
