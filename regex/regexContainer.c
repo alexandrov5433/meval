@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <regex.h>
 
+#include <array/_index.c>
+
 /*
 Documentation for regex.h
 https://pubs.opengroup.org/onlinepubs/009696899/functions/regcomp.html
@@ -156,4 +158,34 @@ char *getGroupValue(const int n, const RegexContainer *container)
         value[i] = (container->matchedInput)[(container->groups)[n].rm_so + i];
     }
     return value;
+}
+
+/**
+ * Get the matched string from a group as a CharArray.
+ * @param n The index of the group indicating the wanted value, from the groups property of the RegexContainer.
+ * Must be 0 or less than the maxGroups property of the RegexContainer, or else NULL is returned.
+ * @param container Pointer to the RegexContainer with the relevant data. If NULL, NULL is returned.
+ * If the isMatch property of the container is 0, NULL is returned.
+ * @returns The pointer to the CharArray containing the string, selected by the group.
+ */
+CharArray *getGroupValueAsCharArray(const int n, const RegexContainer *container)
+{
+    if (container == NULL)
+    {
+        return NULL;
+    }
+    if (n < 0 || n >= container->maxGroups)
+    {
+        return NULL;
+    }
+    if (container->isMatch == 0) {
+        return NULL;
+    }
+    int length = (container->groups)[n].rm_eo - (container->groups)[n].rm_so;
+    char *value = calloc(length, sizeof(char));
+    for (int i = 0; i < length; i++)
+    {
+        value[i] = (container->matchedInput)[(container->groups)[n].rm_so + i];
+    }
+    return newCharArray(value, length);
 }
