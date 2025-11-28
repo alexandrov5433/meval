@@ -2,32 +2,13 @@
 #include <stdlib.h>
 #include <regex.h>
 
-#include <array/_index.c>
+#include "regexContainer.h"
+#include "../array/_index.h"
 
 /*
 Documentation for regex.h
 https://pubs.opengroup.org/onlinepubs/009696899/functions/regcomp.html
 */
-
-/**
- * A container for all regex related data.
- * @param regex A ponter to the compiled regex.
- * @param maxGroups The number of gpoups, which the regex will hold.
- * @param groups A ponter to the groups specified in the regex pattern. The groups count will equal maxGroups.
- * The groups counting stats from 0 - index based. The first group (index 0) indicates the whole matchedInput string.
- * @param matchedInput A pointer to the input string, against which the compiled regex was matched. Initialized as NULL.
- * @param isMatch 1 if a match was made, 0 otherwise. Initialized as 0.
- * 
- * The matchedInput and isMatched properties are changed by the match function.
- */
-typedef struct RegexContainer
-{
-    regex_t *regex;
-    size_t maxGroups;
-    regmatch_t *groups;
-    char *matchedInput;
-    int isMatch;
-} RegexContainer;
 
 /**
  * Creates a new RegexContainer.
@@ -114,7 +95,7 @@ void freeRegexContainer(RegexContainer *container)
  * On failure to match, the isMatch is set to 0 and
  * the matchedInput property is set to NULL.
  */
-void match(const char *input, RegexContainer *container)
+void match(char *input, RegexContainer *container)
 {
     if (input == NULL || container == NULL)
     {

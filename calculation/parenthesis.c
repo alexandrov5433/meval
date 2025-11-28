@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array/_index.c"
+#include "parenthesis.h"
+#include "../array/_index.h"
 
 void checkParenthesisSyntax(CharArray *expression)
 {
     char *exp = expression->str;
     int expLength = expression->length;
 
-    IntArray *markedIndexes = calloc(sizeof(IntArray), 1);
+    IntArray *markedIndexes = calloc(1, sizeof(IntArray));
     markedIndexes->array = NULL; // memory added by realloc in appendInt()
-    markedIndexes->length = calloc(sizeof(int), 1);
     markedIndexes->length = 0;
 
     // (((2 + 3)*5)-1)^2 + (4 - 1)

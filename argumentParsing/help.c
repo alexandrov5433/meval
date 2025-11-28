@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "regex/_index.c"
+#include "help.h"
+#include "../regex/_index.h"
 
 /**
  * If the string at argv[1] is the help flag, helpful information is printed in the terminal 
  * and the program exits. 
  * If there is no match, nothing is done.
  */
-void parseHelp(const char **argv)
+void parseHelp(char **argv)
 {
     RegexContainer *container = newRegexContainer(REGEX_HELP, 2, REG_EXTENDED);
     match(argv[1], container);

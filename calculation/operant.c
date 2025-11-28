@@ -1,17 +1,10 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-#include "array/_index.c"
-#include "expression.c"
-#include "regex/_index.c"
-
-typedef struct Operant
-{
-    CharArray *operantStr;
-    double value;
-    int floatingPointSymbolIncluded; // 1 if symbol ',' or '.' included, else 0 (default).
-    int isExpression;                // 1 if expression, else 0 (default).
-    int isVariable;                  // 1 if variable, else 0 (default).
-} Operant;
+#include "operant.h"
+#include "../array/_index.h"
+#include "expression.h"
+#include "../regex/_index.h"
 
 Operant *newOperant()
 {

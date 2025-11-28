@@ -1,22 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array/_index.c"
-
-typedef struct Expression
-{
-    CharArray *exp;
-    CharArray *expDummy;
-    ExpressionArray *innerExpressions;
-    Expression *parentExpression;
-    double value;
-} Expression;
-
-typedef struct ExpressionArray
-{
-    Expression **array;
-    size_t length;
-} ExpressionArray;
+#include "expression.h"
+#include "../array/_index.h"
+#include "operator.h"
 
 /**
  * Deletes the pointer to the Expression from the ExpressionArray, if present.
@@ -160,8 +147,8 @@ static void addInnerExpression(Expression *mainExp, Expression *innerExp)
         exit(EXIT_FAILURE);
     }
 
-    *innerExpArr = newArray;
-    innerExpArr[mainExp->innerExpressions->length] = innerExp; // old length is now the last index
+    mainExp->innerExpressions->array = newArray;
+    (mainExp->innerExpressions->array)[mainExp->innerExpressions->length] = innerExp; // old length is now the last index
     mainExp->innerExpressions->length++;                       // increment old length, to actually show length
 }
 
@@ -183,7 +170,7 @@ static void extractExpression(Expression *mainExp, int openIndex, int closeIndex
 {
     CharArray *placeholder = createPlaceholder(innerExpCounter);
 
-    CharArray *innerExp = copy(mainExp, openIndex + 1, closeIndex - 1); // +1 and -1 to not copy the '(' and ')'
+    CharArray *innerExp = copy(mainExp->exp, openIndex + 1, closeIndex - 1); // +1 and -1 to not copy the '(' and ')'
     replacePart(mainExp->exp, openIndex, closeIndex, placeholder);
     freeCharArray(placeholder);
 
@@ -255,7 +242,7 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
 
     // 2 + #0#^2 + #1#*2
     char *expStr = expression->expDummy->str;
-    int *expLength = &(expression->expDummy->length);
+    size_t *expLength = &(expression->expDummy->length);
 
     // operator: ^
     for (int exponentIndex = 0; exponentIndex < *expLength; exponentIndex++)

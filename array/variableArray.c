@@ -1,24 +1,7 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-/**
- * @param name The name of the Variable - a single character.
- * @param value The value of the Variable - a double.
- */
-typedef struct Variable
-{
-    char name;
-    double value;
-} Variable;
-
-/**
- * @param array An array of pointers to Variable-s.
- * @param length The length of the array property as an integer; the count of the Variable-s in array.
- */
-typedef struct VariableArray
-{
-    Variable **array;
-    int length;
-} VariableArray;
+#include "variableArray.h"
 
 /**
  * Creates a new Varaible.
@@ -80,7 +63,7 @@ void freeVariableArray(VariableArray *ptr) {
  * @param newVariable The pointer to the Variable, which must be appended to the VariableArray.
  * @param variables The pointer to the VariableArray, at the end of which the pointer to the Variable will be appended.
  */
-void appendVariable(const Variable *newVariable, VariableArray *variables)
+void appendVariable(Variable *newVariable, VariableArray *variables)
 {
     Variable **temp = realloc(variables->array, sizeof(Variable *) * (variables->length + 1));
     if (temp == NULL)

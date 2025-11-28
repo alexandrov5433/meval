@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "array/_index.c"
-#include "regex/_index.c"
+#include "expression.h"
+#include "../array/_index.h"
+#include "../regex/_index.h"
 
-CharArray *parseExpression(const char argc, const char **argv) {
+CharArray *parseExpression(const char argc, char **argv) {
     RegexContainer *container = newRegexContainer(REGEX_MATH_EXPRESSION, 3, REG_EXTENDED);
     for (int i = 1; i < argc; i++) {
         match(argv[1], container);

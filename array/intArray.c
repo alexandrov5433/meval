@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct IntArray {
-    int *array;
-    size_t length;
-} IntArray;
+#include "intArray.h"
 
 /**
  * Extends the integer array (array property) of the given IntArray (obj) with n slots.

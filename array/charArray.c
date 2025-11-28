@@ -1,15 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/**
- * @param str The actual character array.
- * @param length The length of str.
- */
-typedef struct CharArray
-{
-    char *str;
-    size_t length;
-} CharArray;
+#include "charArray.h"
 
 static void _incertString(char *strToIncertInto, const char *strToIncert, size_t strToIncertLength, size_t startIndex)
 {

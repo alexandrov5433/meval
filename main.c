@@ -3,8 +3,11 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "data.c"
-#include "argumentParsing/_index.c"
+#include "regex/_index.h"
+#include "argumentParsing/_index.h"
+#include "array/_index.h"
+#include "calculation/_index.h"
+#include "data.h"
 
 int main(int argc, char **argv)
 {
@@ -26,6 +29,7 @@ int main(int argc, char **argv)
         printf("Could not find an expression (-e|--expression) flag.\n");
         exit(EXIT_FAILURE);
     }
+    setRootExpression(expression, data);
     
     // variable
     // TODO: Handle case where the are no variables in the expression.
@@ -35,6 +39,12 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     
+    evaluate(data);
+
+    printf("Expression value: %d\n", data->expression->value);
     printf("\nDone.\n");
+
+    freeData(data);
+
     return EXIT_SUCCESS;
 }

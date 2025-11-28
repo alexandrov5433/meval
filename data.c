@@ -1,15 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "array/_index.c"
-#include "calculation/_index.c"
-#include "regex/_index.c"
-
-typedef struct Data
-{
-    Expression *expression;
-    VariableArray *variables;
-} Data;
+#include "data.h"
+#include "array/_index.h"
+#include "calculation/_index.h"
 
 /**
  * Creates a new Data structure.

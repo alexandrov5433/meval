@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array/_index.c"
-#include "operant.c"
-#include "expression.c"
+#include "operator.h"
+#include "../array/_index.h"
+#include "operant.h"
+#include "expression.h"
 
 
 void calcOperator(Expression *expression, VariableArray *variables, int operatorIndex)
