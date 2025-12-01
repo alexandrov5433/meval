@@ -12,7 +12,7 @@ CharArray *parseExpression(const char argc, char **argv) {
         match(argv[1], container);
         if (container->isMatch == 1) {
             freeRegexContainer(container);
-            return getGroupValueAsCharArray(1, container);
+            return getGroupValueAsCharArray(2, container);
         }
 
     }
