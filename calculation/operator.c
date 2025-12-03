@@ -12,37 +12,31 @@ void calcOperator(Expression *expression, VariableArray *variables, int operator
     double result = 0;
     char operator = (expression->expDummy->str)[operatorIndex];
 
-    Operant leftOp = {
-        .operantStr = newCharArray(NULL, 0),
-        .value = 0,
-        .floatingPointSymbolIncluded = 0};
-    Operant rightOp = {
-        .operantStr = newCharArray(NULL, 0),
-        .value = 0,
-        .floatingPointSymbolIncluded = 0};
+    Operant *leftOp = newOperant();
+    Operant *rightOp = newOperant();
 
     // left
     int indexLeft = operatorIndex - 1;
-    getLeftOperant(expression, variables, &leftOp, &indexLeft);
+    getLeftOperant(expression, variables, leftOp, &indexLeft);
 
     // right
     int indexRight = operatorIndex + 1;
-    getRightOperant(expression, variables, &rightOp, &indexRight);
+    getRightOperant(expression, variables, rightOp, &indexRight);
 
     // calculate rusult
     switch (operator)
     {
     case '*':
-        result = leftOp.value * rightOp.value;
+        result = leftOp->value * rightOp->value;
         break;
     case '/':
-        result = leftOp.value / rightOp.value;
+        result = leftOp->value / rightOp->value;
         break;
     case '+':
-        result = leftOp.value + rightOp.value;
+        result = leftOp->value + rightOp->value;
         break;
     case '-':
-        result = leftOp.value - rightOp.value;
+        result = leftOp->value - rightOp->value;
         break;
     default:
         printf("\nSyntax Error:\n"
@@ -51,6 +45,9 @@ void calcOperator(Expression *expression, VariableArray *variables, int operator
                operator);
         exit(EXIT_FAILURE);
     }
+
+    freeOperant(leftOp);
+    freeOperant(rightOp);
 
     // clear evaluated characters; set their indexes to Space (32) ' '
     int clearStart = indexLeft + 1;
