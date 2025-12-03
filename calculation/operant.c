@@ -137,7 +137,7 @@ void getLeftOperant(Expression *expression, VariableArray *variables, Operant *l
     // skip white space
     while (1)
     {
-        if (*indexLeft <= 0)
+        if (*indexLeft < 0)
         {
             printf("\nSyntax Error:\n"
                    "The expression ended unexpectedly, while evaluating an operant.\n");
@@ -164,7 +164,7 @@ void getLeftOperant(Expression *expression, VariableArray *variables, Operant *l
 
         while (1)
         {
-            if (*indexLeft <= 0)
+            if (*indexLeft < 0)
             {
                 printf("\nSyntax Error:\n"
                        "The expression ended unexpectedly, while evaluating an operant.\n");
@@ -202,7 +202,7 @@ void getLeftOperant(Expression *expression, VariableArray *variables, Operant *l
     leftOp->isVariable = 0;
     while (1)
     {
-        if (*indexLeft <= 0)
+        if (*indexLeft < 0)
         {
             printf("\nSyntax Error:\n"
                    "The expression ended unexpectedly, while evaluating an operant.\n");
