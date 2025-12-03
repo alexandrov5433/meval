@@ -333,6 +333,7 @@ Expression *newExpression(CharArray *expression, Expression *parentExpression)
     newExp->value = 0.0;
 
     parse(newExp);
+    return newExp;
 }
 
 static ExpressionArray *newExpressionArray(Expression *exp)
