@@ -43,8 +43,6 @@ void appendCharToOperant(char c, Operant *op)
 /**
  * Extends the CharArray (operantStr) of the Operant by 1.
  * All elements are shifted to the right by 1 and the given character (c) is placed at the start (at index 0).
- * @return 0 on success, 1 otherwise.
- * 1 is returned when realloc fails (realloc returns NULL).
  */
 void prependCharToOperant(char c, Operant *op)
 {
