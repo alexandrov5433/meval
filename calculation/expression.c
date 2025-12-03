@@ -158,12 +158,21 @@ static void addInnerExpression(Expression *mainExp, Expression *innerExp)
  */
 static CharArray *createPlaceholder(int *n)
 {
-    // INT_MAX == 2147483647 == 10 char
-    char *buffer = calloc(12, sizeof(char));
+    // INT_MAX == 2147483647 == 10 char ; 2 '#' char; '\0' char from sprintf
+    char *buffer = calloc(13, sizeof(char));
     sprintf(buffer, "#%d#", *n);
-    CharArray *placeholder = newCharArray(buffer, 19);
+    int placeholderLength = 0;
+    for (int i = 1; i < 13; i++) {
+        // index 0 is always '#'
+        if (buffer[i] == '#') {
+            placeholderLength = i + 1;
+            break;
+        }
+    }
+    CharArray *placeholder = newCharArray(buffer, placeholderLength);
     squish(placeholder);
     free(buffer);
+    return placeholder;
 }
 
 static void extractExpression(Expression *mainExp, int openIndex, int closeIndex, int *innerExpCounter)
