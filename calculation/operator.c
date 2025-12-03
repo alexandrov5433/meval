@@ -50,8 +50,8 @@ void calcOperator(Expression *expression, VariableArray *variables, int operator
     freeOperant(rightOp);
 
     // clear evaluated characters; set their indexes to Space (32) ' '
-    int clearStart = indexLeft + 1;
-    int clearEnd = indexRight - 1;
+    int clearStart = indexLeft < 0 ? 0 : indexLeft;
+    int clearEnd = indexRight >= expression->expDummy->length ? expression->expDummy->length - 1 : indexRight;
     clearSpace(expression->expDummy, clearStart, clearEnd);
 
     incertDoubleInStrAtIndex(expression->expDummy, result, operatorIndex);

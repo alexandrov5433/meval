@@ -49,6 +49,15 @@ void prependCharToOperant(char c, Operant *op)
     prependCharTo(op->operantStr, c);
 }
 
+static int isOperantStringValid(Operant *op)
+{
+    if (op->operantStr->length > 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int extractPlaceholderInt(CharArray *placeholder)
 {
     // #2134#
@@ -228,7 +237,7 @@ void getLeftOperant(Expression *expression, VariableArray *variables, Operant *l
 
             evaluateOperantValue(expression, variables, leftOp);
 
-            break;
+            return;
         }
         (*indexLeft)--;
     }
@@ -244,6 +253,11 @@ void getRightOperant(Expression *expression, VariableArray *variables, Operant *
     {
         if (*indexRight >= expLength)
         {
+            if (isOperantStringValid(rightOp))
+            {
+                evaluateOperantValue(expression, variables, rightOp);
+                return;
+            }
             printf("\nSyntax Error:\n"
                    "The expression ended unexpectedly, while evaluating an operant.\n");
             exit(EXIT_FAILURE);
@@ -309,6 +323,12 @@ void getRightOperant(Expression *expression, VariableArray *variables, Operant *
     {
         if (*indexRight >= expLength)
         {
+            if (isOperantStringValid(rightOp))
+            {
+                evaluateOperantValue(expression, variables, rightOp);
+                *indexRight = expLength - 1;
+                return;
+            }
             printf("\nSyntax Error:\n"
                    "The expression ended unexpectedly, while evaluating an operant.\n");
             exit(EXIT_FAILURE);
@@ -332,10 +352,14 @@ void getRightOperant(Expression *expression, VariableArray *variables, Operant *
         else
         {
             checkOperantEnd(rightOp); // exit if invalid
-
             evaluateOperantValue(expression, variables, rightOp);
+            /*
+            Decrement index, because at this point indexRight is the character which follows
+            the last character of this operant.
+             */
+            (*indexRight)--;
 
-            break;
+            return;
         }
         (*indexRight)++;
     }

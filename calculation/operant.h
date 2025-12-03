@@ -24,6 +24,8 @@ void appendCharToOperant(char c, Operant *op);
 
 void prependCharToOperant(char c, Operant *op);
 
+static int isOperantStringValid(Operant *op);
+
 int extractPlaceholderInt(CharArray *placeholder);
 
 void evaluateOperantValue(Expression *expression, VariableArray *variables, Operant *op);
