@@ -25,6 +25,7 @@ int main(int argc, char **argv)
 
     // expression
     CharArray *expression = parseExpression(argc, argv);
+    squish(expression);
     if (expression == NULL) {
         printf("Could not find an expression (-e|--expression) flag.\n");
         exit(EXIT_FAILURE);
