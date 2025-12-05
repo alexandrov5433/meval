@@ -4,6 +4,7 @@
 #include "expression.h"
 #include "../array/_index.h"
 #include "operator.h"
+#include "calculationChain.h"
 
 /**
  * Deletes the pointer to the Expression from the ExpressionArray, if present.
@@ -12,13 +13,13 @@
  * If NULL, nothing is done and the (same) pointer given for the ExpressionArray is returned.
  * Even if removed from the array, the memory of this pointer is NOT freed.
  * @param arr A pointer to the ExpressionArray, from which the pointer to the Expression must be deleted.
- * If NULL, nothing is done and NULL is returned. 
- * The memory of this (old) pointer is freed: 
- * 
+ * If NULL, nothing is done and NULL is returned.
+ * The memory of this (old) pointer is freed:
+ *
  * 1. when the new one is returned.
- * 
- * 2. when there was only one element in the ExpressionArray, which was deleted. 
- * 
+ *
+ * 2. when there was only one element in the ExpressionArray, which was deleted.
+ *
  * @return A new pointer to the newly created (without the targeted Expression pointer) ExpressionArray.
  * The length of the new array will be with one less than that of the targeted ExpressionArray.
  * If the new array is empty (e.g. the targeted ExpressionArray contained only 1 pointer, which was to be deleted), NULL is returned.
@@ -33,7 +34,7 @@ ExpressionArray *deleteExpFromArray(Expression *exp, ExpressionArray *arr)
     {
         return NULL;
     }
-    
+
     int isPresent = 0;
     for (int i = 0; i < arr->length; i++)
     {
@@ -47,9 +48,10 @@ ExpressionArray *deleteExpFromArray(Expression *exp, ExpressionArray *arr)
     {
         return arr;
     }
-    
+
     int newLength = (arr->length) - 1;
-    if (newLength <= 0) {
+    if (newLength <= 0)
+    {
         free(arr);
         return NULL;
     }
@@ -149,7 +151,7 @@ static void addInnerExpression(Expression *mainExp, Expression *innerExp)
 
     mainExp->innerExpressions->array = newArray;
     (mainExp->innerExpressions->array)[mainExp->innerExpressions->length] = innerExp; // old length is now the last index
-    mainExp->innerExpressions->length++;                       // increment old length, to actually show length
+    mainExp->innerExpressions->length++;                                              // increment old length, to actually show length
 }
 
 /**
@@ -162,9 +164,11 @@ static CharArray *createPlaceholder(int *n)
     char *buffer = calloc(13, sizeof(char));
     sprintf(buffer, "#%d#", *n);
     int placeholderLength = 0;
-    for (int i = 1; i < 13; i++) {
+    for (int i = 1; i < 13; i++)
+    {
         // index 0 is always '#'
-        if (buffer[i] == '#') {
+        if (buffer[i] == '#')
+        {
             placeholderLength = i + 1;
             break;
         }
@@ -248,6 +252,158 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
             calculateExpressionValue((expression->innerExpressions->array)[i], variables);
         }
     }
+    CalculationChain *calcChain = newCalculationChain();
+
+    // build CalculationChain
+    // 2+#0#^2+#1#*2
+    int markerIndex = 0;
+    while (markerIndex < expression->exp->length)
+    {
+        Operant *operant = newOperant();
+
+        // operator
+        for (int i = markerIndex; i < expression->exp->length; i++)
+        {
+            char c = (expression->exp->str)[i];
+            if (c == '+' || c == '-' || c == '*' || c == '/' || c == '^')
+            {
+                operant->operator = c;
+                markerIndex = i + 1;
+                break;
+            }
+        }
+
+        // operant
+        // case: inner expression placeholder: #0#
+        if ((expression->exp->str)[markerIndex] == '#')
+        {
+            operant->isExpression = 1;
+            operant->isVariable = 0;
+            appendCharToOperant('#', operant); // opening #
+
+            for (int i = markerIndex + 1; i < expression->exp->length; i++)
+            {
+                char c = (expression->exp->str)[i];
+                if (c >= 48 && c <= 57)
+                {
+                    appendCharToOperant(c, operant); // 0-9
+                }
+                else if (c == '#')
+                {
+                    appendCharToOperant('#', operant); // closing #
+                    markerIndex = i + 1;
+                    break;
+                }
+            }
+        }
+        else if ((expression->exp->str)[markerIndex] > 96 && (expression->exp->str)[markerIndex] < 123)
+        {
+            // case: variable
+            // 'a' == 97 ; 'z' == 122
+            operant->isExpression = 0;
+            operant->isVariable = 1;
+            appendCharToOperant((expression->exp->str)[markerIndex], operant);
+            markerIndex++;
+        }
+        else
+        {
+            // case: integer or double
+            operant->isExpression = 0;
+            operant->isVariable = 0;
+            for (int i = markerIndex; i < expression->exp->length; i++)
+            {
+                char c = (expression->exp->str)[i];
+                if (c >= 48 && c <= 57)
+                {
+                    appendCharToOperant(c, operant); // 0-9
+                }
+                else if (c == '.' || c == ',')
+                {
+                    checkFloatingPointIncluded(operant); // exits if '.' or ',' is already included.
+                    appendCharToOperant(c, operant);
+                    operant->floatingPointSymbolIncluded = 1;
+                }
+                else
+                {
+                    checkOperantEnd(operant); // exits if '.' or ',' is the last character
+                    markerIndex = i;
+                    break;
+                }
+            }
+        }
+
+        evaluateOperantValue(expression, variables, operant);
+        appendOperantToChain(calcChain, operant);
+    }
+
+    // calculate expression value from CalculationChain
+    // operator: ^
+    Operant **chain = calcChain->chain;
+    int *chainLength = &(calcChain->length);
+    for (int exponentIndex = 0; exponentIndex < *chainLength; exponentIndex++)
+    {
+        Operant *currentOperant = chain[exponentIndex];
+        if (currentOperant->operator == '^')
+        {
+            Operant *previousOperant = chain[exponentIndex - 1];
+            
+            exponentIndex = 0;
+        }
+    }
+    // operator: *
+    for (int multiplicationIndex = 0; multiplicationIndex < *expLength; multiplicationIndex++)
+    {
+        char currentChar = expStr[multiplicationIndex];
+        if (currentChar == '*')
+        {
+            calcOperator(expression, variables, multiplicationIndex);
+            multiplicationIndex = 0;
+        }
+    }
+    // operator: /
+    for (int divisionIndex = 0; divisionIndex < *expLength; divisionIndex++)
+    {
+        char currentChar = expStr[divisionIndex];
+        if (currentChar == '/')
+        {
+            calcOperator(expression, variables, divisionIndex);
+            divisionIndex = 0;
+        }
+    }
+    // operator: +
+    for (int additionIndex = 0; additionIndex < *expLength; additionIndex++)
+    {
+        char currentChar = expStr[additionIndex];
+        if (currentChar == '+')
+        {
+            calcOperator(expression, variables, additionIndex);
+            additionIndex = 0;
+        }
+    }
+    // operator: -
+    for (int subtractionIndex = 0; subtractionIndex < *expLength; subtractionIndex++)
+    {
+        char currentChar = expStr[subtractionIndex];
+        if (currentChar == '-')
+        {
+            calcOperator(expression, variables, subtractionIndex);
+            subtractionIndex = 0;
+        }
+    }
+
+    // free CalculationChain
+}
+
+/*
+void calculateExpressionValue(Expression *expression, VariableArray *variables)
+{
+    if (expression->innerExpressions != NULL)
+    {
+        for (int i = 0; i < expression->innerExpressions->length; i++)
+        {
+            calculateExpressionValue((expression->innerExpressions->array)[i], variables);
+        }
+    }
 
     // 2 + #0#^2 + #1#*2
     char *expStr = expression->expDummy->str;
@@ -309,6 +465,7 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
     // at this point, there should be only one number in the expression's string - the result
     expression->value = strtod(expStr, NULL);
 }
+ */
 
 /**
  * Creates a new Expression.

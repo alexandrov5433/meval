@@ -6,6 +6,10 @@
 #include "expression.h"
 #include "../regex/_index.h"
 
+/**
+ * Creates a new Operant.
+ * @return The pointer to the new Operant.
+ */
 Operant *newOperant()
 {
     Operant *operant = calloc(1, sizeof(Operant));
@@ -19,6 +23,7 @@ Operant *newOperant()
     operant->floatingPointSymbolIncluded = 0;
     operant->isExpression = 0;
     operant->isVariable = 0;
+    operant->operator = '\0';
     return operant;
 }
 
@@ -28,6 +33,10 @@ Operant *newOperant()
  */
 void freeOperant(Operant *operant)
 {
+    if (operant == NULL)
+    {
+        return;
+    }
     freeCharArray(operant->operantStr);
     free(operant);
 }
@@ -86,6 +95,10 @@ void evaluateOperantValue(Expression *expression, VariableArray *variables, Oper
     {
         int i = extractPlaceholderInt(op->operantStr);
         op->value = ((expression->innerExpressions->array)[i])->value;
+        if (op->operator == '-' && op->value > 0)
+        {
+            op->value *= -1.0;
+        }
     }
     else if (op->isVariable == 1)
     {
@@ -97,10 +110,18 @@ void evaluateOperantValue(Expression *expression, VariableArray *variables, Oper
             exit(EXIT_FAILURE);
         }
         op->value = var->value;
+        if (op->operator == '-' && op->value > 0)
+        {
+            op->value *= -1.0;
+        }
     }
     else
     {
         op->value = strtod(op->operantStr->str, NULL);
+        if (op->operator == '-' && op->value > 0)
+        {
+            op->value *= -1.0;
+        }
     }
 }
 

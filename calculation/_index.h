@@ -2,3 +2,4 @@
 #include "operant.h"
 #include "operator.h"
 #include "parenthesis.h"
+#include "calculationChain.h"

@@ -14,6 +14,7 @@ typedef struct Operant
     int floatingPointSymbolIncluded; // 1 if symbol ',' or '.' included, else 0 (default).
     int isExpression;                // 1 if expression, else 0 (default).
     int isVariable;                  // 1 if variable, else 0 (default).
+    char operator;                   // the opearator on the left side of the operant in the expression.
 } Operant;
 
 Operant *newOperant();
