@@ -8,7 +8,11 @@ typedef struct IntArray {
     size_t length;
 } IntArray;
 
-void extendIntArray(IntArray *obj, size_t n);
+IntArray *newIntArray();
+
+void freeIntArray(IntArray *obj);
+
+static void extendIntArray(IntArray *obj, size_t n);
 
 int includesInt(IntArray *obj, int target);
 
