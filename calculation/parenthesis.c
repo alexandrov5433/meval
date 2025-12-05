@@ -9,9 +9,7 @@ void checkParenthesisSyntax(CharArray *expression)
     char *exp = expression->str;
     int expLength = expression->length;
 
-    IntArray *markedIndexes = calloc(1, sizeof(IntArray));
-    markedIndexes->array = NULL; // memory added by realloc in appendInt()
-    markedIndexes->length = 0;
+    IntArray *markedIndexes = newIntArray();
 
     // (((2 + 3)*5)-1)^2 + (4 - 1)
 
@@ -87,12 +85,7 @@ void checkParenthesisSyntax(CharArray *expression)
         }
     }
 
-    // clean-up
-    if (markedIndexes->array != NULL)
-    {
-        free(markedIndexes->array);
-    }
-    free(markedIndexes);
+    freeIntArray(markedIndexes);
 }
 
 /**
