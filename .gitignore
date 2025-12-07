@@ -1,2 +1,5 @@
 .vscode/
 meval
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
