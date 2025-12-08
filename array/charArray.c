@@ -62,13 +62,37 @@ CharArray *newCharArray(const char *str, size_t length)
 }
 
 /**
+ * Creates a new CharArray with the double as a string.
+ * @param d The double, which must be converted to a string.
+ * @return The pointer to the new CharArray.
+ */
+CharArray *newCharArrayFromDouble(double d)
+{
+    char *buffer = calloc(320, sizeof(char));
+    sprintf(buffer, "%.6f", d);
+    int doubleLength = 0;
+    for (int i = 319; i > 0; i--)
+    {
+        if (buffer[i] != 0)
+        {
+            doubleLength = i + 1;
+            break;
+        }
+    }
+    CharArray *newArr = newCharArray(buffer, doubleLength);
+    free(buffer);
+    return newArr;
+}
+
+/**
  * Frees the memory allocated for the CharArray.
  * If the inner char *str property of the CharArray is NULL, it is skipped. Otherwise, it is also freed.
  * @param target Pointer to the CharArray, which is to be freed. If NULL, nothing is done.
  */
 void freeCharArray(CharArray *target)
 {
-    if (target == NULL) {
+    if (target == NULL)
+    {
         return;
     }
     if (target->str != NULL)
@@ -77,8 +101,6 @@ void freeCharArray(CharArray *target)
     }
     free(target);
 }
-
-
 
 /**
  * Extends a character array (array) by a given amount (n) of slots.
@@ -220,7 +242,8 @@ CharArray *copy(CharArray *arr, int startIndex, int endIndex)
                "StartIndex can not be larger than endIndex.\n\n");
         exit(EXIT_FAILURE);
     }
-    if (endIndex > arr->length || endIndex == arr->length) {
+    if (endIndex > arr->length || endIndex == arr->length)
+    {
         printf("\nError: Invalid function arguments for CharArray *copy().\n"
                "EndIndex must be less than the length of the given CharArray.\n\n");
         exit(EXIT_FAILURE);

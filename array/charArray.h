@@ -17,6 +17,8 @@ static void _incertString(char *strToIncertInto, const char *strToIncert, size_t
 
 CharArray *newCharArray(const char *str, size_t length);
 
+CharArray *newCharArrayFromDouble(double d);
+
 void freeCharArray(CharArray *target);
 
 void extendCharArray(CharArray *array, size_t n);
