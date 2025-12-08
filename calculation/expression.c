@@ -350,6 +350,10 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
             exponentIndex = 0;
         }
     }
+
+    int *expLength = &(expression->exp->length);
+    char *expStr = expression->exp->str;
+
     // operator: *
     for (int multiplicationIndex = 0; multiplicationIndex < *expLength; multiplicationIndex++)
     {
