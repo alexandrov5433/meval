@@ -351,7 +351,7 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
         }
     }
 
-    int *expLength = &(expression->exp->length);
+    size_t *expLength = &(expression->exp->length);
     char *expStr = expression->exp->str;
 
     // operator: *
