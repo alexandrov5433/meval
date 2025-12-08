@@ -11,8 +11,9 @@ CharArray *parseExpression(const char argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         match(argv[1], container);
         if (container->isMatch == 1) {
+            CharArray *exp = getGroupValueAsCharArray(2, container);
             freeRegexContainer(container);
-            return getGroupValueAsCharArray(2, container);
+            return exp;
         }
 
     }
