@@ -19,6 +19,8 @@ typedef struct Operant
 
 Operant *newOperant();
 
+Operant *newOperantFromDouble(double d);
+
 void freeOperant(Operant *operant);
 
 void appendCharToOperant(char c, Operant *op);

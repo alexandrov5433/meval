@@ -27,6 +27,22 @@ Operant *newOperant()
     return operant;
 }
 
+Operant *newOperantFromDouble(double d) {
+    Operant *operant = calloc(1, sizeof(Operant));
+    if (operant == NULL)
+    {
+        printf("\nError: Could not allocate memory for a new Operant.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    operant->operantStr = newCharArrayFromDouble(d);
+    operant->value = d;
+    operant->floatingPointSymbolIncluded = 1;
+    operant->isExpression = 0;
+    operant->isVariable = 0;
+    operant->operator = d >= 0 ? '+' : '-';
+    return operant;
+}
+
 /**
  * Frees the memory allocated for the Operant.
  * @param operant A pointer to the Operant, which must be freed.
@@ -95,10 +111,6 @@ void evaluateOperantValue(Expression *expression, VariableArray *variables, Oper
     {
         int i = extractPlaceholderInt(op->operantStr);
         op->value = ((expression->innerExpressions->array)[i])->value;
-        if (op->operator == '-' && op->value > 0)
-        {
-            op->value *= -1.0;
-        }
     }
     else if (op->isVariable == 1)
     {
@@ -110,18 +122,15 @@ void evaluateOperantValue(Expression *expression, VariableArray *variables, Oper
             exit(EXIT_FAILURE);
         }
         op->value = var->value;
-        if (op->operator == '-' && op->value > 0)
-        {
-            op->value *= -1.0;
-        }
     }
     else
     {
         op->value = strtod(op->operantStr->str, NULL);
-        if (op->operator == '-' && op->value > 0)
-        {
-            op->value *= -1.0;
-        }
+    }
+
+    if (op->operator == '-' && op->value > 0)
+    {
+        op->value *= -1.0;
     }
 }
 
