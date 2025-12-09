@@ -252,10 +252,10 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
             calculateExpressionValue((expression->innerExpressions->array)[i], variables);
         }
     }
-    CalculationChain *calcChain = newCalculationChain();
 
     // build CalculationChain
     // 2+#0#^2+#1#*2
+    CalculationChain *calcChain = newCalculationChain();
     int markerIndex = 0;
     while (markerIndex < expression->exp->length)
     {
@@ -337,139 +337,89 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
     }
 
     // calculate expression value from CalculationChain
-    // operator: ^
     Operant **chain = calcChain->chain;
     int *chainLength = &(calcChain->length);
+
+    // operator: ^
     for (int exponentIndex = 0; exponentIndex < *chainLength; exponentIndex++)
     {
         Operant *currentOperant = chain[exponentIndex];
         if (currentOperant->operator == '^')
         {
-            Operant *previousOperant = chain[exponentIndex - 1];
-            
+            /*
+                First Operant in chain can not be with ^ operator.
+                There will always be a previous operant.
+            */
+            mergeOperants(calcChain, exponentIndex - 1, exponentIndex);
             exponentIndex = 0;
         }
     }
 
-    size_t *expLength = &(expression->exp->length);
-    char *expStr = expression->exp->str;
-
     // operator: *
-    for (int multiplicationIndex = 0; multiplicationIndex < *expLength; multiplicationIndex++)
+    for (int multiplicationIndex = 0; multiplicationIndex < *chainLength; multiplicationIndex++)
     {
-        char currentChar = expStr[multiplicationIndex];
-        if (currentChar == '*')
+        Operant *currentOperant = chain[multiplicationIndex];
+        if (currentOperant->operator == '*')
         {
-            calcOperator(expression, variables, multiplicationIndex);
+            /*
+                First Operant in chain can not be with * operator.
+                There will always be a previous operant.
+            */
+            mergeOperants(calcChain, multiplicationIndex - 1, multiplicationIndex);
             multiplicationIndex = 0;
         }
     }
+
     // operator: /
-    for (int divisionIndex = 0; divisionIndex < *expLength; divisionIndex++)
+    for (int divisionIndex = 0; divisionIndex < *chainLength; divisionIndex++)
     {
-        char currentChar = expStr[divisionIndex];
-        if (currentChar == '/')
+        Operant *currentOperant = chain[divisionIndex];
+        if (currentOperant->operator == '/')
         {
-            calcOperator(expression, variables, divisionIndex);
+            /*
+                First Operant in chain can not be with / operator.
+                There will always be a previous operant.
+            */
+            mergeOperants(calcChain, divisionIndex - 1, divisionIndex);
             divisionIndex = 0;
         }
     }
+
     // operator: +
-    for (int additionIndex = 0; additionIndex < *expLength; additionIndex++)
+    for (int additionIndex = 1; additionIndex < *chainLength; additionIndex++)
     {
-        char currentChar = expStr[additionIndex];
-        if (currentChar == '+')
+        Operant *currentOperant = chain[additionIndex];
+        if (currentOperant->operator == '+')
         {
-            calcOperator(expression, variables, additionIndex);
-            additionIndex = 0;
+            /*
+                Starting from index 1 to prevent errors.
+                The first operator may have '+', '-' or '\0' as a value for the operator property.
+                If only one Operant is left in the CalculationChain, no futher calculations are needed. This one Operant is the end result.
+            */
+            mergeOperants(calcChain, additionIndex - 1, additionIndex);
+            additionIndex = 1;
         }
     }
+
     // operator: -
-    for (int subtractionIndex = 0; subtractionIndex < *expLength; subtractionIndex++)
+    for (int subtractionIndex = 1; subtractionIndex < *chainLength; subtractionIndex++)
     {
-        char currentChar = expStr[subtractionIndex];
-        if (currentChar == '-')
+        Operant *currentOperant = chain[subtractionIndex];
+        if (currentOperant->operator == '-')
         {
-            calcOperator(expression, variables, subtractionIndex);
-            subtractionIndex = 0;
+            /*
+                Starting from index 1 to prevent errors.
+                The first operator may have '+', '-' or '\0' as a value for the operator property.
+                If only one Operant is left in the CalculationChain, no futher calculations are needed. This one Operant is the end result.
+            */
+            mergeOperants(calcChain, subtractionIndex - 1, subtractionIndex);
+            subtractionIndex = 1;
         }
     }
 
-    // free CalculationChain
+    expression->value = ((calcChain->chain)[0])->value;
+    freeCalculationChain(calcChain);
 }
-
-/*
-void calculateExpressionValue(Expression *expression, VariableArray *variables)
-{
-    if (expression->innerExpressions != NULL)
-    {
-        for (int i = 0; i < expression->innerExpressions->length; i++)
-        {
-            calculateExpressionValue((expression->innerExpressions->array)[i], variables);
-        }
-    }
-
-    // 2 + #0#^2 + #1#*2
-    char *expStr = expression->expDummy->str;
-    size_t *expLength = &(expression->expDummy->length);
-
-    // operator: ^
-    for (int exponentIndex = 0; exponentIndex < *expLength; exponentIndex++)
-    {
-        char currentChar = expStr[exponentIndex];
-        if (currentChar == '^')
-        {
-            calcOperator(expression, variables, exponentIndex);
-            exponentIndex = 0;
-        }
-    }
-    // operator: *
-    for (int multiplicationIndex = 0; multiplicationIndex < *expLength; multiplicationIndex++)
-    {
-        char currentChar = expStr[multiplicationIndex];
-        if (currentChar == '*')
-        {
-            calcOperator(expression, variables, multiplicationIndex);
-            multiplicationIndex = 0;
-        }
-    }
-    // operator: /
-    for (int divisionIndex = 0; divisionIndex < *expLength; divisionIndex++)
-    {
-        char currentChar = expStr[divisionIndex];
-        if (currentChar == '/')
-        {
-            calcOperator(expression, variables, divisionIndex);
-            divisionIndex = 0;
-        }
-    }
-    // operator: +
-    for (int additionIndex = 0; additionIndex < *expLength; additionIndex++)
-    {
-        char currentChar = expStr[additionIndex];
-        if (currentChar == '+')
-        {
-            calcOperator(expression, variables, additionIndex);
-            additionIndex = 0;
-        }
-    }
-    // operator: -
-    for (int subtractionIndex = 0; subtractionIndex < *expLength; subtractionIndex++)
-    {
-        char currentChar = expStr[subtractionIndex];
-        if (currentChar == '-')
-        {
-            calcOperator(expression, variables, subtractionIndex);
-            subtractionIndex = 0;
-        }
-    }
-
-    // TODO: add logarithm, math. constants etc.
-
-    // at this point, there should be only one number in the expression's string - the result
-    expression->value = strtod(expStr, NULL);
-}
- */
 
 /**
  * Creates a new Expression.
