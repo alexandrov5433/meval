@@ -13,7 +13,7 @@ CalculationChain *newCalculationChain();
 
 void freeCalculationChain(CalculationChain *calcChain);
 
-static void incertOperantAt(CalculationChain *calcChain, const Operant *operant, int i);
+static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i);
 
 static void deleteOperantAt(CalculationChain *calcChain, int i);
 
