@@ -3,7 +3,6 @@
 
 #include "expression.h"
 #include "../array/_index.h"
-#include "operator.h"
 #include "calculationChain.h"
 
 /**
@@ -125,12 +124,6 @@ void freeExpression(Expression *ptr)
         ptr->parentExpression->innerExpressions = deleteExpFromArray(ptr, ptr->parentExpression->innerExpressions);
     }
     _freeExpression(ptr);
-}
-
-void updateDummy(Expression *expression)
-{
-    freeCharArray(expression->expDummy);
-    expression->expDummy = copy(expression->exp, 0, expression->exp->length - 1);
 }
 
 static void addInnerExpression(Expression *mainExp, Expression *innerExp)
@@ -438,7 +431,6 @@ Expression *newExpression(CharArray *expression, Expression *parentExpression)
         exit(EXIT_FAILURE);
     }
     newExp->exp = expression;
-    newExp->expDummy = copy(expression, 0, expression->length - 1);
     newExp->innerExpressions = NULL;
     newExp->parentExpression = parentExpression; // can be NULL
     newExp->value = 0.0;

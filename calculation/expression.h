@@ -7,7 +7,6 @@
 typedef struct Expression
 {
     CharArray *exp;
-    CharArray *expDummy;
     struct ExpressionArray *innerExpressions;
     struct Expression *parentExpression;
     double value;
@@ -24,8 +23,6 @@ ExpressionArray *deleteExpFromArray(Expression *exp, ExpressionArray *arr);
 static void _freeExpression(Expression *ptr);
 
 void freeExpression(Expression *ptr);
-
-void updateDummy(Expression *expression);
 
 static void addInnerExpression(Expression *mainExp, Expression *innerExp);
 

@@ -37,8 +37,4 @@ void checkOperantEnd(Operant *op);
 
 void checkFloatingPointIncluded(Operant *op);
 
-void getLeftOperant(Expression *expression, VariableArray *variables, Operant *leftOp, int *indexLeft);
-
-void getRightOperant(Expression *expression, VariableArray *variables, Operant *rightOp, int *indexRight);
-
 #endif
