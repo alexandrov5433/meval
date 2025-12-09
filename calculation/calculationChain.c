@@ -50,7 +50,7 @@ void freeCalculationChain(CalculationChain *calcChain)
  * If either calcChain or operant are NULL, the program exits with an error. 
  * If i is less than 0 or greater than the length of the CalculationChain, the program exits with an error.  
  */
-static void incertOperantAt(CalculationChain *calcChain, const Operant *operant, int i)
+static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i)
 {
     if (calcChain == NULL)
     {
