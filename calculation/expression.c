@@ -232,8 +232,6 @@ static void parse(Expression *mainExp)
             }
         }
     }
-
-    updateDummy(mainExp);
 }
 
 void calculateExpressionValue(Expression *expression, VariableArray *variables)
