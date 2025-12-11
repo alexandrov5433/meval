@@ -101,8 +101,8 @@ static void _freeExpression(Expression *ptr)
         for (int i = 0; i < ptr->innerExpressions->length; i++)
         {
             _freeExpression((ptr->innerExpressions->array)[i]);
-            free(ptr->innerExpressions);
         }
+        free(ptr->innerExpressions);
     }
     free(ptr);
 }
