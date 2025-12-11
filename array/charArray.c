@@ -47,7 +47,7 @@ CharArray *newCharArray(const char *str, size_t length)
     }
     else
     {
-        newStr = calloc(length, sizeof(char));
+        newStr = calloc(length + 1, sizeof(char));
     }
 
     newArr->str = newStr;
@@ -56,6 +56,7 @@ CharArray *newCharArray(const char *str, size_t length)
     if (newStr != NULL && str != NULL)
     {
         _incertString(newArr->str, str, length, 0);
+        (newArr->str)[length] = '\0'; // add null terminator at the end of the string
     }
 
     return newArr;
@@ -115,20 +116,6 @@ void extendCharArray(CharArray *array, size_t n)
     }
     array->str = temp;
     array->length += n;
-}
-
-/**
- * Convertes the a range of characters of a string to Space.
- * The range for conversion is from (including) startIndex to (including) endIndex.
- * Space is the character represented by ' ', with an ASCII value of 32.
- */
-void clearSpace(CharArray *arr, int startIndex, int endIndex)
-{
-    // TODO: remove function ???
-    for (int i = startIndex; i <= endIndex; i++)
-    {
-        (arr->str)[i] = ' ';
-    }
 }
 
 /**

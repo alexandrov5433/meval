@@ -23,8 +23,6 @@ void freeCharArray(CharArray *target);
 
 void extendCharArray(CharArray *array, size_t n);
 
-void clearSpace(CharArray *arr, int startIndex, int endIndex);
-
 char getLastChar(CharArray *arr);
 
 int getLastIndex(CharArray *arr);
