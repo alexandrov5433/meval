@@ -108,12 +108,25 @@ void freeCharArray(CharArray *target)
  */
 void extendCharArray(CharArray *array, size_t n)
 {
-    char *temp = realloc(array->str, sizeof(char) * (array->length + n));
+    if (array == NULL)
+    {
+        printf("\nError: Expected pointer to CharArray, received NULL. Function: extendCharArray.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    // +1 because of the null terminator, not included in the length.
+    char *temp = realloc(array->str, sizeof(char) * (array->length + 1 + n));
     if (temp == NULL)
     {
         printf("\nError: Could not reallocate CharArray array.\n\n");
         exit(EXIT_FAILURE);
     }
+    // the old length is the current index of the null terminator
+    for (int i = array->length; i < array->length + 1 + n; i++)
+    {
+        temp[i] = ' ';
+    }
+    // the new length is the new index of the terminator
+    temp[array->length + n] = '\0';
     array->str = temp;
     array->length += n;
 }
@@ -198,7 +211,7 @@ void replacePart(CharArray *arr, int startIndex, int endIndex, CharArray *replac
 
     int replaceCount = endIndex - startIndex + 1;
     size_t newStrLength = (arr->length - replaceCount) + replacement->length;
-    char *newStr = calloc(sizeof(char), newStrLength);
+    char *newStr = calloc(sizeof(char), newStrLength + 1); // +1 terminator
 
     for (int i = 0; i < startIndex; i++)
     {
@@ -212,6 +225,7 @@ void replacePart(CharArray *arr, int startIndex, int endIndex, CharArray *replac
     {
         newStr[startIndex + replacement->length + i] = (arr->str)[endIndex + 1 + i];
     }
+    newStr[newStrLength] = '\0';
 
     free(arr->str);
     arr->str = newStr;
@@ -229,7 +243,7 @@ CharArray *copy(CharArray *arr, int startIndex, int endIndex)
                "StartIndex can not be larger than endIndex.\n\n");
         exit(EXIT_FAILURE);
     }
-    if (endIndex > arr->length || endIndex == arr->length)
+    if (endIndex >= arr->length)
     {
         printf("\nError: Invalid function arguments for CharArray *copy().\n"
                "EndIndex must be less than the length of the given CharArray.\n\n");
@@ -268,7 +282,7 @@ void squish(CharArray *arr)
             spaceNeeded++;
         }
     }
-    char *squishedStr = calloc(sizeof(char), spaceNeeded);
+    char *squishedStr = calloc(sizeof(char), spaceNeeded + 1); // +1 terminator
     if (squishedStr == NULL)
     {
         printf("\nError: Could not allocate memory for a new char *str.\n\n");
@@ -286,7 +300,7 @@ void squish(CharArray *arr)
             currentIndexInSquished++;
         }
     }
-
+    squishedStr[spaceNeeded] = '\0';
     free(arr->str);
     arr->str = squishedStr;
     arr->length = spaceNeeded;
