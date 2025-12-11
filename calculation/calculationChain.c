@@ -62,7 +62,12 @@ static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i
         printf("\nError: Expected Operant pointer, received NULL.\n\n");
         exit(EXIT_FAILURE);
     }
-    if (i < 0 || i >= calcChain->length)
+    if (i < 0 || (i > 0 && i >= calcChain->length))
+    {
+        printf("\nError: Index out of bounds for incertOperantAt function.\n\n");
+        exit(EXIT_FAILURE);
+    }
+    if (i != 0 && calcChain->length == 0)
     {
         printf("\nError: Index out of bounds for incertOperantAt function.\n\n");
         exit(EXIT_FAILURE);
@@ -101,6 +106,8 @@ static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i
  * Deletes the Operant at i index and removes the pointer form the CalculationChain.
  * @param calcChain A pointer to the CalculationChain.
  * @param i The index at which the targeted Operator should be found.
+ * 
+ * The length of the CalculationChain is reduced by one.
  */
 static void deleteOperantAt(CalculationChain *calcChain, int i)
 {
@@ -125,7 +132,7 @@ static void deleteOperantAt(CalculationChain *calcChain, int i)
     int newChainLength = calcChain->length - 1;
     if (newChainLength <= 0)
     {
-        for (int i = 0; calcChain->length; i++)
+        for (int i = 0; i < calcChain->length; i++)
         {
             freeOperant((calcChain->chain)[i]);
         }
@@ -237,7 +244,7 @@ static void replaceOperants(CalculationChain *calcChain, int indexFirst, int ind
     }
 
     deleteOperantAt(calcChain, indexFirst);
-    deleteOperantAt(calcChain, indexSecond);
+    deleteOperantAt(calcChain, indexSecond - 1);
     incertOperantAt(calcChain, replacement, indexFirst);
 }
 
@@ -285,7 +292,11 @@ void mergeOperants(CalculationChain *calcChain, int indexFirst, int indexSecond)
         result = (left->value) + (right->value);
         break;
     case '-':
-        result = (left->value) - (right->value);
+        if (right->value < 0) {
+            result = (left->value) + (right->value);
+        } else {
+            result = (left->value) - (right->value);
+        }
         break;
     }
 
