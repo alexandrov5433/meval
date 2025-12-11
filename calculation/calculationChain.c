@@ -111,7 +111,7 @@ static void deleteOperantAt(CalculationChain *calcChain, int i)
     }
     if (i < 0 || i >= calcChain->length)
     {
-        printf("\nError: Index out of bounds for deleteOperantAr function.\n\n");
+        printf("\nError: Index out of bounds for deleteOperantAt function.\n\n");
         exit(EXIT_FAILURE);
     }
 
