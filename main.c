@@ -42,10 +42,7 @@ int main(int argc, char **argv)
     
     evaluate(data);
 
-    puts("#######");
-    printf("Expression value: %.6f\n", data->expression->value);
-    puts("Done.");
-    puts("#######");
+    printf("Expression value: %.2f\n", data->expression->value);
 
     freeData(data);
 
