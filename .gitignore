@@ -2,3 +2,6 @@ meval
 meval.exe
 .vscode
 .vscode/**
+build
+build/**
+cmake_build_commands.txt
