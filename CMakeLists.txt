@@ -48,3 +48,23 @@ if (MSVC)
 else()
     target_compile_options(meval PRIVATE -Wall -Wextra -Wpedantic)
 endif()
+
+
+include(CTest)
+
+add_test(NAME Test_Expression_1 COMMAND meval "-e='2+x'" "-v=x=2")
+add_test(NAME Test_Expression_2 COMMAND meval "--expression='(x - 2)^2'" "-v=x=-2")
+
+set(regex_t_e_1 [[Expression value: 4\.00]])
+set(regex_t_e_2 [[Expression value: 16\.00]])
+message(STATUS "REGEX regex_t_e_1 = [${regex_t_e_1}]")
+message(STATUS "REGEX regex_t_e_2 = [${regex_t_e_2}]")
+
+set_property(
+    TEST Test_Expression_1
+    PROPERTY PASS_REGULAR_EXPRESSION "${regex_t_e_1}"
+)
+set_property(
+    TEST Test_Expression_2
+    PROPERTY PASS_REGULAR_EXPRESSION "${regex_t_e_2}"
+)
