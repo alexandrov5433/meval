@@ -342,13 +342,13 @@ mainLoop:
     }
 
     // calculate expression value from CalculationChain
-    Operant **chain = calcChain->chain;
+    // Operant **chain = calcChain->chain;
     int *chainLength = &(calcChain->length);
 
     // operator: ^
     for (int exponentIndex = 0; exponentIndex < *chainLength; exponentIndex++)
     {
-        Operant *currentOperant = chain[exponentIndex];
+        Operant *currentOperant = (calcChain->chain)[exponentIndex];
         if (currentOperant->operator == '^')
         {
             /*
@@ -363,7 +363,7 @@ mainLoop:
     // operator: *
     for (int multiplicationIndex = 0; multiplicationIndex < *chainLength; multiplicationIndex++)
     {
-        Operant *currentOperant = chain[multiplicationIndex];
+        Operant *currentOperant = (calcChain->chain)[multiplicationIndex];
         if (currentOperant->operator == '*')
         {
             /*
@@ -378,7 +378,7 @@ mainLoop:
     // operator: /
     for (int divisionIndex = 0; divisionIndex < *chainLength; divisionIndex++)
     {
-        Operant *currentOperant = chain[divisionIndex];
+        Operant *currentOperant = (calcChain->chain)[divisionIndex];
         if (currentOperant->operator == '/')
         {
             /*
@@ -393,7 +393,7 @@ mainLoop:
     // operator: +
     for (int additionIndex = 1; additionIndex < *chainLength; additionIndex++)
     {
-        Operant *currentOperant = chain[additionIndex];
+        Operant *currentOperant = (calcChain->chain)[additionIndex];
         if (currentOperant->operator == '+')
         {
             /*
@@ -409,7 +409,7 @@ mainLoop:
     // operator: -
     for (int subtractionIndex = 1; subtractionIndex < *chainLength; subtractionIndex++)
     {
-        Operant *currentOperant = chain[subtractionIndex];
+        Operant *currentOperant = (calcChain->chain)[subtractionIndex];
         if (currentOperant->operator == '-')
         {
             /*
