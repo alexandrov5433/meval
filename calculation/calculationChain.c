@@ -45,10 +45,10 @@ void freeCalculationChain(CalculationChain *calcChain)
  * Incerts a pointer to Operant at an index of a CalculationChain.
  * @param calcChain A pointer to the CalculationChain, in which the pointer must be incerted.
  * @param operant The pointer, which must be incerted.
- * @param i The index of the CalculationChain, at which the pointer to the Operant must be incerted. 
- * 
- * If either calcChain or operant are NULL, the program exits with an error. 
- * If i is less than 0 or greater than the length of the CalculationChain, the program exits with an error.  
+ * @param i The index of the CalculationChain, at which the pointer to the Operant must be incerted.
+ *
+ * If either calcChain or operant are NULL, the program exits with an error.
+ * If i is less than 0 or greater than the length of the CalculationChain, the program exits with an error.
  */
 static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i)
 {
@@ -62,18 +62,12 @@ static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i
         printf("\nError: Expected Operant pointer, received NULL.\n\n");
         exit(EXIT_FAILURE);
     }
-    if (i < 0 || (i > 0 && i >= calcChain->length))
-    {
-        printf("\nError: Index out of bounds for incertOperantAt function.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    if (i != 0 && calcChain->length == 0)
-    {
-        printf("\nError: Index out of bounds for incertOperantAt function.\n\n");
-        exit(EXIT_FAILURE);
+    int newChainLength = calcChain->length + 1;
+    if (i < 0 || i >= newChainLength) {
+            printf("\nError: Index out of bounds for incertOperantAt function.\n\n");
+            exit(EXIT_FAILURE);
     }
 
-    int newChainLength = calcChain->length + 1;
     Operant **newChain = calloc(newChainLength, sizeof(Operant *));
     if (newChain == NULL)
     {
@@ -106,7 +100,7 @@ static void incertOperantAt(CalculationChain *calcChain, Operant *operant, int i
  * Deletes the Operant at i index and removes the pointer form the CalculationChain.
  * @param calcChain A pointer to the CalculationChain.
  * @param i The index at which the targeted Operator should be found.
- * 
+ *
  * The length of the CalculationChain is reduced by one.
  */
 static void deleteOperantAt(CalculationChain *calcChain, int i)
@@ -201,14 +195,14 @@ void appendOperantToChain(CalculationChain *calcChain, Operant *op)
  * @param indexFirst The index of the first Operant for removal in the CalculationChain.
  * @param indexSecond The index of the second Operant for removal in the CalculationChain.
  * @param replacement A pointer to an Operant, which will be added in the CalculationChain at the indexFirst index.
- * 
+ *
  * The program exits with an error:
- * 
+ *
  * 1. if either calcChain or replacement are NULL.
- * 
+ *
  * 2. if either indexFirst or indexSecond are less than 0 or greater than/equal to the length of the CalculationChain.
- * 
- * 3. if indexFirst is equal to/greater than indexSecond. 
+ *
+ * 3. if indexFirst is equal to/greater than indexSecond.
  */
 static void replaceOperants(CalculationChain *calcChain, int indexFirst, int indexSecond, Operant *replacement)
 {
@@ -249,11 +243,11 @@ static void replaceOperants(CalculationChain *calcChain, int indexFirst, int ind
 }
 
 /**
- * Calculates the result of the two Operants and incerts it in the CalculationChain. 
+ * Calculates the result of the two Operants and incerts it in the CalculationChain.
  * The result - in the form of a new Operant - can be found at the indexFirst index of the CalculationChain.
  * @param calcChain A pointer to the CalculationChain. If NULL, the program exits with an error.
  * @param indexFirst The index of the first Operant in the CalculationChain used in the calculation of the result. Must be greater than 0 and with 1 less than indexSecond.
- * @param indexSecond The index of the second Operant in the CalculationChain used in the calculation of the result. Must be greater than 0 and less than the length of the CalculationChain. 
+ * @param indexSecond The index of the second Operant in the CalculationChain used in the calculation of the result. Must be greater than 0 and less than the length of the CalculationChain.
  */
 void mergeOperants(CalculationChain *calcChain, int indexFirst, int indexSecond)
 {
@@ -292,9 +286,12 @@ void mergeOperants(CalculationChain *calcChain, int indexFirst, int indexSecond)
         result = (left->value) + (right->value);
         break;
     case '-':
-        if (right->value < 0) {
+        if (right->value < 0)
+        {
             result = (left->value) + (right->value);
-        } else {
+        }
+        else
+        {
             result = (left->value) - (right->value);
         }
         break;
