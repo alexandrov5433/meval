@@ -72,7 +72,7 @@ set(regex_result_4 [[Expression value: 4\.00]])
 set(regex_result_16 [[Expression value: 16\.00]])
 set(regex_result_5 [[Expression value: 5\.00]])
 set(regex_result_5000000 [[Expression value: 5000000\.00]])
-set(regex_result_n44 [[Expression value: -44\.00]])
+set(regex_result_n800 [[Expression value: -800\.00]])
 # message(STATUS "REGEX regex_result_4 = [${regex_result_4}]")
 # message(STATUS "REGEX regex_result_16 = [${regex_result_16}]")
 
@@ -90,7 +90,7 @@ set_property(
 )
 set_property(
     TEST Test_Result_1_3
-    PROPERTY PASS_REGULAR_EXPRESSION "${regex_result_n44}"
+    PROPERTY PASS_REGULAR_EXPRESSION "${regex_result_n800}"
 )
 set_property(
     TEST
