@@ -248,7 +248,8 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
     // 2+#0#^2+#1#*2
     CalculationChain *calcChain = newCalculationChain();
     int markerIndex = 0;
-    mainLoop: while (markerIndex < expression->exp->length)
+mainLoop:
+    while (markerIndex < expression->exp->length)
     {
         Operant *operant = newOperant();
 
@@ -303,14 +304,20 @@ void calculateExpressionValue(Expression *expression, VariableArray *variables)
                 if (c >= 48 && c <= 57)
                 {
                     appendCharToOperant(c, operant); // 0-9
-                    if (i + 1 < expression->exp->length) {
+                    if (i + 1 < expression->exp->length)
+                    {
                         char nextChar = (expression->exp->str)[i + 1];
-                        if (nextChar < 48 || nextChar > 57) {
+                        if (nextChar < 48 || nextChar > 57)
+                        {
                             checkOperantEnd(operant);
                             markerIndex = i + 1;
+                            evaluateOperantValue(expression, variables, operant);
+                            appendOperantToChain(calcChain, operant);
                             goto mainLoop;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         checkOperantEnd(operant);
                         markerIndex = i + 1;
                     }
