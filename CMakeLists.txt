@@ -6,23 +6,23 @@ add_executable(meval)
 
 target_sources(meval
     PRIVATE
-        main.c
-        data.c
+        src/main.c
+        src/data.c
 
-        argumentParsing/expression.c
-        argumentParsing/help.c
-        argumentParsing/variable.c
+        src/argumentParsing/expression.c
+        src/argumentParsing/help.c
+        src/argumentParsing/variable.c
 
-        array/charArray.c
-        array/intArray.c
-        array/variableArray.c
+        src/array/charArray.c
+        src/array/intArray.c
+        src/array/variableArray.c
 
-        calculation/calculationChain.c
-        calculation/expression.c
-        calculation/operant.c
-        calculation/parenthesis.c
+        src/calculation/calculationChain.c
+        src/calculation/expression.c
+        src/calculation/operant.c
+        src/calculation/parenthesis.c
 
-        regex/regexContainer.c
+        src/regex/regexContainer.c
 )
 
 target_include_directories(meval
@@ -34,6 +34,9 @@ target_include_directories(meval
         calculation
         regex
 )
+
+# Link math library. Translates to compilaition with -lm flag.
+target_link_libraries(meval m)
 
 include(CheckLibraryExists)
 
@@ -51,6 +54,7 @@ endif()
 
 
 # TESTS
+# run 'ctest' in build directory to execute tests
 
 include(CTest)
 # Result
