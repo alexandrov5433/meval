@@ -35,6 +35,16 @@ target_include_directories(meval
         regex
 )
 
+# Compile lib code with -g flag, enabling debugging of lib_test.exe with working breakpoints
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING
+        "Choose the type of build." FORCE)
+endif()
+
+# Link galxlib library. Translates to compilation with -lgalxlib flag.
+# Galxlib is a custom library and must be installed manually. https://github.com/alexandrov5433/glib
+target_link_libraries(meval galxlib)
+
 # Link math library. Translates to compilaition with -lm flag.
 target_link_libraries(meval m)
 
