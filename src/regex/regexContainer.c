@@ -3,7 +3,7 @@
 #include <regex.h>
 
 #include "regexContainer.h"
-#include "../array/_index.h"
+#include "galxlib/gstring.h"
 
 /*
 Documentation for regex.h
@@ -149,7 +149,7 @@ char *getGroupValue(const int n, const RegexContainer *container)
  * If the isMatch property of the container is 0, NULL is returned.
  * @returns The pointer to the CharArray containing the string, selected by the group.
  */
-CharArray *getGroupValueAsCharArray(const int n, const RegexContainer *container)
+String *getGroupValueAsString(const int n, const RegexContainer *container)
 {
     if (container == NULL)
     {
@@ -163,10 +163,14 @@ CharArray *getGroupValueAsCharArray(const int n, const RegexContainer *container
         return NULL;
     }
     int length = (container->groups)[n].rm_eo - (container->groups)[n].rm_so;
-    char *value = calloc(length, sizeof(char));
+    String *str = new_string(NULL, 0);
+
+    // char *value = calloc(length, sizeof(char));
     for (int i = 0; i < length; i++)
     {
-        value[i] = (container->matchedInput)[(container->groups)[n].rm_so + i];
+        // value[i] = (container->matchedInput)[(container->groups)[n].rm_so + i] 
+        append_char((container->matchedInput)[(container->groups)[n].rm_so + i], str);
     }
-    return newCharArray(value, length);
+    // return newCharArray(value, length);
+    return str;
 }

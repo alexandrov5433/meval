@@ -1,9 +1,10 @@
-#include <stdlib.h>
-#include <regex.h>
-#include "../array/_index.h"
 
 #ifndef REGEX_CONTAINER
 #define REGEX_CONTAINER
+
+#include <stdlib.h>
+#include <regex.h>
+#include "galxlib/gstring.h"
 
 /**
  * A container for all regex related data.
@@ -33,6 +34,6 @@ void match(char *input, RegexContainer *container);
 
 char *getGroupValue(const int n, const RegexContainer *container);
 
-CharArray *getGroupValueAsCharArray(const int n, const RegexContainer *container);
+String *getGroupValueAsString(const int n, const RegexContainer *container);
 
 #endif
