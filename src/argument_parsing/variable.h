@@ -2,7 +2,6 @@
 #define ARGUMENT_PARSING_VARIABLE
 
 #include <stdlib.h>
-#include "../regex/_index.h"
 #include "galxlib/dynamic_array.h"
 
 /**
@@ -19,6 +18,6 @@ Variable *new_variable(const char name, const double value);
 
 inline void free_variable(Variable *var);
 
-int parse_variable(DynamicArray *var_arr, const char argc, char **argv);
+int parse_variable(DynamicArray *var_arr, const int argc, char **argv, int *output_is_match);
 
 #endif

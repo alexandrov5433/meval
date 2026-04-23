@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "parenthesis.h"
-#include "../array/_index.h"
 
 void checkParenthesisSyntax(CharArray *expression)
 {
@@ -89,14 +88,16 @@ void checkParenthesisSyntax(CharArray *expression)
 }
 
 /**
- * Increment the given integer (intToIncrement) without exceeding the given ceiling (ceiling).
- * Eg. if ceiling is 5 and the integer is 4, the integer will be incremented to 5.
- * If the integer is bigger than or equal to the ceiling (>=), nothing is done.
+ * Increment the given integer without exceeding the given ceiling.
+ * If ceiling is 5 and the integer is 4, the integer will be incremented to 5.
+ * If the integer is bigger than or equal to the ceiling, nothing is done.
+ * @param to_increment A pointer to the integer to increment.
+ * @param ceiling The maximum value for the integer.
  */
-void incrementWithMax(int *intToIncrement, int ceiling)
+inline void increment_with_ceiling(int *to_increment, int ceiling)
 {
-    if (ceiling > *intToIncrement)
+    if (ceiling > *to_increment)
     {
-        *intToIncrement++;
+        *to_increment++;
     }
 }

@@ -1,50 +1,96 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 
-#include "regex/_index.h"
-#include "argumentParsing/_index.h"
-#include "array/_index.h"
+#include "argument_parsing/_index.h"
 #include "calculation/_index.h"
+#include "galxlib/gstring.h"
 #include "data.h"
+
+Data *data = NULL;
+
+void clean_up(void)
+{
+	free_data(data);
+}
 
 int main(int argc, char **argv)
 {
-    if (argc <= 1)
-    {
-        printf("Missing command line arguments.\nPlease run 'meval -h' for help.\n\n");
-        exit(EXIT_FAILURE);
-    }
+	if (argc <= 1)
+	{
+		printf("Error: Missing command line arguments.\nPlease run 'meval -h' for help.\n");
+		return EXIT_FAILURE;
+	}
 
-    // help
-    parseHelp(argv);
+	// parsing help
+	int parse_help_is_match = 0;
+	int parse_help_err_status = parse_help(argv, &parse_help_is_match);
+	if (parse_help_err_status)
+	{
+		printf(
+		    "Error: parse_help returned error code %d, while parsing the command line arguments.\n",
+		    parse_help_err_status);
+		return EXIT_FAILURE;
+	}
+	if (parse_help_is_match)
+		return EXIT_SUCCESS;
 
-    // meta data
-    Data *data = newData();
+	// Meta data initialization and clean_up function registration.
+	atexit(clean_up);
+	Data *data = new_data();
 
-    // expression
-    CharArray *expression = parseExpression(argc, argv);
-    squish(expression);
-    if (expression == NULL) {
-        printf("Could not find an expression (-e|--expression) flag.\n");
-        exit(EXIT_FAILURE);
-    }
-    setRootExpression(expression, data);
-    
-    // variable
-    // TODO: Handle case where the are no variables in the expression.
-    parseVariable(data->variables, argc, argv);
-    if (data->variables->array == NULL) {
-        printf("Could not find variable (-v|--variable) flags.\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    evaluate(data);
+	// parsing expression
+	String *expression = NULL;
+	int parse_expression_is_match = 0;
+	int parse_err_status = parse_expression(argc, argv, &expression, &parse_expression_is_match);
+	if (parse_err_status)
+	{
+		printf(
+		    "Error: parse_expression returned error code %d, while parsing the command line arguments.\n",
+		    parse_err_status);
+		exit(EXIT_FAILURE);
+	}
+	if (parse_expression_is_match)
+	{
+		printf("Could not find an expression (-e|--expression) flag.\n");
+		exit(EXIT_FAILURE);
+	}
+	if (expression == NULL)
+	{
+		printf("Error: Undexpened error occured. Expression pointer is NULL.\n parse_expression error code: %d.\n", parse_err_status);
+		exit(EXIT_FAILURE);
+	}
 
-    printf("Expression value: %.2f\n", data->expression->value);
+	int remove_space_err_status = remove_char(expression, ' ');
+	if (remove_space_err_status)
+	{
+		printf(
+		    "Error: remove_char returned error code %d, while processing the expression string.\n",
+		    remove_space_err_status);
+		exit(EXIT_FAILURE);
+	}
+	set_root_expression(expression, data);
 
-    freeData(data);
+	// parsing variables
+	int parse_variable_is_match = 0;
+	int parse_variable_err_status = parse_variable(data->variables, argc, argv, &parse_variable_is_match);
+	if (parse_variable_err_status)
+	{
+		printf(
+		    "Error: parse_variable returned error code %d, while parsing the command line arguments.\n",
+		    parse_variable_err_status);
+		exit(EXIT_FAILURE);
+	}
+	if (parse_variable_is_match == 0)
+	{
+		printf(
+		    "Error: No variables (-v|--varaible) were found, while parsing the command line arguments.\n");
+		exit(EXIT_FAILURE);
+	}
 
-    return EXIT_SUCCESS;
+	// expression evaluation stage
+	evaluate(data);
+
+	printf("Expression value: %.2f\n", data->expression->value);
+
+	exit(EXIT_SUCCESS);
 }

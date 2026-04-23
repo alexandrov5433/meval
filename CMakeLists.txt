@@ -9,30 +9,23 @@ target_sources(meval
         src/main.c
         src/data.c
 
-        src/argumentParsing/expression.c
-        src/argumentParsing/help.c
-        src/argumentParsing/variable.c
+        src/argument_parsing/expression.c
+        src/argument_parsing/help.c
+        src/argument_parsing/variable.c
 
-        src/array/charArray.c
-        src/array/intArray.c
-        src/array/variableArray.c
-
-        src/calculation/calculationChain.c
+        src/calculation/calculation_chain.c
         src/calculation/expression.c
         src/calculation/operant.c
         src/calculation/parenthesis.c
-
-        src/regex/regexContainer.c
 )
 
 target_include_directories(meval
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 
-        argumentParsing
+        argument_parsing
         array
         calculation
-        regex
 )
 
 # Compile lib code with -g flag, enabling debugging of lib_test.exe with working breakpoints

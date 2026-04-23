@@ -2,8 +2,8 @@
 #include <stdio.h>
 
 #include "data.h"
-#include "array/_index.h"
-#include "calculation/_index.h"
+#include "galxlib/dynamic_array.h"
+#include "argument_parsing/variable.h"
 
 /**
  * Creates a new Data structure.
@@ -11,31 +11,36 @@
  * The .expression is initialized as NULL. Use the addExpressionToData function to add the root expression.
  *
  * The .variables is initialized with the newVariableArray function.
- * @return The pointer to the new Data.
+ * @return On success the pointer to the new Data, otherwise NULL.
  */
-Data *newData()
+Data *new_data()
 {
-    Data *data = calloc(1, sizeof(Data));
-    if (data == NULL)
-    {
-        printf("\nError: Could not allocate memory for a new Data.\n\n");
-        exit(EXIT_FAILURE);
-    }
+	Data *data = calloc(1, sizeof(Data));
+	if (data == NULL)
+		return NULL;
 
-    data->expression = NULL;
-    data->variables = newVariableArray();
+	data->expression = NULL;
 
-    return data;
+	DynamicArray *var_arr = new_dynamic_array(VOID_PTR);
+	if (var_arr == NULL)
+	{
+		free(data);
+		return NULL;
+	}
+	data->variables = var_arr;
+
+	return data;
 }
 
-void freeData(Data *data)
+void free_data(Data *data)
 {
-    if (data == NULL)
-    {
-        return;
-    }
-    freeExpression(data->expression);
-    free(data);
+	if (data == NULL)
+		return;
+	
+	freeExpression(data->expression);
+	int err = process_da(data->variables, free_variable);
+	free_dynamic_array(data->variables);
+	free(data);
 }
 
 /**
@@ -43,51 +48,46 @@ void freeData(Data *data)
  * @param exp The pointer to the CharArray, which will be used to parse the root Expression.
  * This new Expression will be set to the .expression property of the Data structure.
  * @param data The pointer to the Data structure.
- *
- * The program exits with EXIT_FAILURE:
- *
- * 1. If either of the function arguments are NULL.
- *
- * 2. If the Data structure already has a set root Expression.
+ * @returns 0 on success. On failure:
+ * 
+ * 1 if either of the arguments are NULL.
+ * 
+ * 2 if the expression property of the data structure is already set.
  */
-void setRootExpression(CharArray *exp, Data *data)
+int set_root_expression(String *exp, Data *data)
 {
-    if (exp == NULL || data == NULL)
-    {
-        printf("\nError: NULL pointers are not acceptable arguments for the setRootExpression function.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    if (data->expression != NULL)
-    {
-        printf("\nError: The given Data structure already has a set expression property.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    checkParenthesisSyntax(exp);
-    data->expression = newExpression(exp, NULL);
+	if (exp == NULL || data == NULL)
+		return 1;
+
+	if (data->expression != NULL)
+		return 2;
+
+	checkParenthesisSyntax(exp);
+	data->expression = newExpression(exp, NULL);
+	return 0;
 }
 
 /**
  * Evaluates the root expression.
  * @param data A pointer to the Data structure, containing the Expression.
- *
- * The program exits with EXIT_FAILURE if either of the .expression and .variables properties of the Data structure are NULL.
- *
+ * @returns 0 on success. On failure:
+ * 
+ * 1 if the data argument is NULL.
+ * 
+ * 2 if the expression property of data is NULL.
+ * 
+ * 3 if the variables property of data is NULL.
  */
-void evaluate(const Data *data)
+int evaluate(const Data *data)
 {
-    if (data == NULL) {
-        printf("\nError: The given Data pointer is NULL.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    if (data->expression == NULL)
-    {
-        printf("\nError: The given Data structure has a NULL pointer for an .expression property.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    if (data->variables == NULL)
-    {
-        printf("\nError: The given Data structure has a NULL pointer for a .variables property.\n\n");
-        exit(EXIT_FAILURE);
-    }
-    calculateExpressionValue(data->expression, data->variables);
+	if (data == NULL)
+		return 1;
+	if (data->expression == NULL)
+		return 2;
+	if (data->variables == NULL)
+		return 3;
+
+	calculateExpressionValue(data->expression, data->variables);
+
+	return 0;
 }

@@ -2,9 +2,7 @@
 #include <stdio.h>
 
 #include "operant.h"
-#include "../array/_index.h"
 #include "expression.h"
-#include "../regex/_index.h"
 
 /**
  * Creates a new Operant.

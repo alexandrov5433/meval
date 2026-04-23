@@ -2,21 +2,22 @@
 #define DATA
 
 #include <stdlib.h>
-#include "array/_index.h"
 #include "calculation/_index.h"
+#include "galxlib/dynamic_array.h"
+#include "galxlib/gstring.h"
 
 typedef struct Data
 {
-    Expression *expression;
-    VariableArray *variables;
+	Expression *expression;
+	DynamicArray *variables;
 } Data;
 
-Data *newData();
+Data *new_data();
 
-void freeData(Data *data);
+void free_data(Data *data);
 
-void setRootExpression(CharArray *exp, Data *data);
+int set_root_expression(String *exp, Data *data);
 
-void evaluate(const Data *data);
+int evaluate(const Data *data);
 
 #endif

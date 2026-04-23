@@ -1,11 +1,8 @@
-#include <stdlib.h>
-
-#include "expression.h"
-#include "../array/_index.h"
-#include "../regex/_index.h"
-
 #ifndef CALCULATION_OPERANT
 #define CALCULATION_OPERANT
+#include <stdlib.h>
+#include "expression.h"
+
 
 typedef struct Operant
 {

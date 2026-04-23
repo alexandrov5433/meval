@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "calculationChain.h"
+#include "calculation_chain.h"
 #include "operant.h"
 
 /**
